@@ -1,0 +1,2705 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FilePeek</title>
+    <script src="https://cdn.jsdelivr.net/npm/exifreader@4.44.1/dist/exif-reader.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/marked@12.0.0/marked.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+    <script>
+        pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+    </script>
+    <style>
+        :root {
+            --bg: #090a0f;
+            --surface: #11131a;
+            --surface-subtle: #171a24;
+            --surface-hover: #1d212e;
+            --border: #232736;
+            --border-focus: #3b4259;
+            --text-primary: #e6e8ee;
+            --text-secondary: #8b92a5;
+            --text-tertiary: #585f73;
+            --accent: #4f75ff;
+            --accent-soft: rgba(79, 117, 255, 0.12);
+            --danger: #e5484d;
+            --success: #30a46c;
+            --code-bg: #0c0d12;
+            --mono: "JetBrains Mono", "SFMono-Regular", Consolas, Menlo, monospace;
+            --sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            background: var(--bg);
+            color: var(--text-primary);
+            font-family: var(--sans);
+            font-size: 14px;
+            line-height: 1.5;
+            padding: 40px 24px 80px;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        .container {
+            max-width: 960px;
+            margin: 0 auto;
+        }
+
+        header {
+            margin-bottom: 28px;
+        }
+
+        h1 {
+            font-size: 24px;
+            font-weight: 600;
+            letter-spacing: -0.02em;
+            color: var(--text-primary);
+            margin-bottom: 4px;
+        }
+
+        .subtitle {
+            font-size: 13px;
+            color: var(--text-secondary);
+        }
+
+        #dropZone {
+            background: var(--surface);
+            border: 1px dashed var(--border);
+            border-radius: 6px;
+            padding: 48px 24px;
+            text-align: center;
+            cursor: pointer;
+            transition: border-color 0.15s ease, background 0.15s ease;
+            user-select: none;
+        }
+
+        #dropZone:hover {
+            border-color: var(--border-focus);
+            background: var(--surface-subtle);
+        }
+
+        #dropZone.dragging {
+            border-color: var(--accent);
+            background: var(--accent-soft);
+        }
+
+        #dropZone .drop-title {
+            font-size: 14px;
+            font-weight: 500;
+            color: var(--text-primary);
+            margin-bottom: 4px;
+        }
+
+        #dropZone .drop-sub {
+            font-size: 12px;
+            color: var(--text-tertiary);
+        }
+
+        #fileInput {
+            display: none;
+        }
+
+        #output {
+            margin-top: 32px;
+        }
+
+        .section-block {
+            margin-bottom: 28px;
+        }
+
+        .section-header-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 10px;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .section-header {
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+            color: var(--text-secondary);
+        }
+
+        .sub-header {
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--text-secondary);
+            margin: 16px 0 8px;
+        }
+
+        .table-wrap {
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            overflow-x: auto;
+            background: var(--surface);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            text-align: left;
+            font-size: 13px;
+        }
+
+        th,
+        td {
+            padding: 9px 14px;
+            border-bottom: 1px solid var(--border);
+            vertical-align: top;
+        }
+
+        th {
+            background: var(--surface-subtle);
+            color: var(--text-secondary);
+            font-weight: 500;
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        tr:last-child td {
+            border-bottom: none;
+        }
+
+        td.cell-key {
+            width: 28%;
+            color: var(--text-secondary);
+            font-family: var(--mono);
+            font-size: 12px;
+            white-space: nowrap;
+        }
+
+        td.cell-val {
+            color: var(--text-primary);
+            word-break: break-word;
+        }
+
+        td.cell-mono {
+            font-family: var(--mono);
+            font-size: 12px;
+            word-break: break-all;
+        }
+
+        img {
+            display: block;
+            max-width: 100%;
+            max-height: 540px;
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            background: var(--surface);
+            margin-top: 8px;
+        }
+
+        canvas {
+            display: block;
+            max-width: 100%;
+            height: auto;
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            background: #ffffff;
+            margin-top: 8px;
+        }
+
+        canvas.dark-canvas {
+            background: #090a0f;
+        }
+
+        audio,
+        video {
+            display: block;
+            width: 100%;
+            max-width: 540px;
+            margin-top: 8px;
+            border-radius: 6px;
+        }
+
+        iframe {
+            display: block;
+            width: 100%;
+            height: 480px;
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            background: #ffffff;
+            margin-top: 8px;
+        }
+
+        .markdown-preview {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            padding: 20px 24px;
+            margin-top: 8px;
+            color: var(--text-primary);
+            line-height: 1.65;
+            overflow-wrap: break-word;
+        }
+
+        .markdown-preview h1,
+        .markdown-preview h2,
+        .markdown-preview h3,
+        .markdown-preview h4 {
+            color: var(--text-primary);
+            margin: 20px 0 10px;
+            letter-spacing: -0.01em;
+        }
+
+        .markdown-preview h1:first-child,
+        .markdown-preview h2:first-child {
+            margin-top: 0;
+        }
+
+        .markdown-preview p,
+        .markdown-preview ul,
+        .markdown-preview ol,
+        .markdown-preview blockquote {
+            margin-bottom: 14px;
+        }
+
+        .markdown-preview ul,
+        .markdown-preview ol {
+            padding-left: 24px;
+        }
+
+        .markdown-preview code {
+            font-family: var(--mono);
+            font-size: 12px;
+            background: var(--code-bg);
+            border: 1px solid var(--border);
+            padding: 2px 6px;
+            border-radius: 4px;
+            color: #d1d5db;
+        }
+
+        .markdown-preview pre {
+            margin-top: 0;
+            margin-bottom: 14px;
+        }
+
+        .markdown-preview pre code {
+            border: none;
+            padding: 0;
+            background: transparent;
+        }
+
+        .markdown-preview blockquote {
+            border-left: 3px solid var(--accent);
+            padding-left: 14px;
+            color: var(--text-secondary);
+        }
+
+        .markdown-preview a {
+            color: var(--accent);
+            text-decoration: none;
+        }
+
+        .markdown-preview a:hover {
+            text-decoration: underline;
+        }
+
+        .markdown-preview hr {
+            border: 0;
+            border-top: 1px solid var(--border);
+            margin: 20px 0;
+        }
+
+        pre {
+            background: var(--code-bg);
+            color: #d1d5db;
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            padding: 14px;
+            font-family: var(--mono);
+            font-size: 12px;
+            line-height: 1.55;
+            overflow: auto;
+            margin-top: 8px;
+        }
+
+        #hex-output {
+            white-space: pre;
+            overflow-x: auto;
+        }
+
+        .btn-row {
+            display: flex;
+            gap: 8px;
+            margin: 10px 0;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+
+        button {
+            background: var(--surface-subtle);
+            border: 1px solid var(--border);
+            color: var(--text-primary);
+            font-family: inherit;
+            font-size: 12px;
+            font-weight: 500;
+            padding: 7px 12px;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background 0.15s ease, border-color 0.15s ease;
+        }
+
+        button:hover {
+            background: var(--surface-hover);
+            border-color: var(--border-focus);
+        }
+
+        button:active {
+            background: var(--surface);
+        }
+
+        button:disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+        }
+
+        button.btn-primary {
+            background: var(--accent);
+            border-color: var(--accent);
+            color: #ffffff;
+        }
+
+        button.btn-primary:hover {
+            background: #3d63f0;
+            border-color: #3d63f0;
+        }
+
+        button.btn-success {
+            background: var(--success);
+            border-color: var(--success);
+            color: #ffffff;
+        }
+
+        input[type="text"],
+        select {
+            background: var(--code-bg);
+            border: 1px solid var(--border);
+            color: var(--text-primary);
+            padding: 6px 10px;
+            border-radius: 4px;
+            font-family: inherit;
+            font-size: 12px;
+            outline: none;
+        }
+
+        input[type="text"]:focus,
+        select:focus {
+            border-color: var(--accent);
+        }
+
+        .editor-textarea {
+            width: 100%;
+            height: 340px;
+            background: var(--code-bg);
+            color: #d1d5db;
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            padding: 14px;
+            font-family: var(--mono);
+            font-size: 12px;
+            line-height: 1.55;
+            resize: vertical;
+            outline: none;
+            margin-top: 8px;
+            box-sizing: border-box;
+        }
+
+        .editor-textarea:focus {
+            border-color: var(--accent);
+        }
+
+        .hex-editor-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-family: var(--mono);
+            font-size: 12px;
+        }
+
+        .hex-editor-table th {
+            background: var(--surface-subtle);
+            color: var(--text-secondary);
+            font-weight: 500;
+            padding: 6px 10px;
+            border-bottom: 1px solid var(--border);
+            text-align: left;
+        }
+
+        .hex-editor-table td {
+            padding: 4px 6px;
+            border-bottom: 1px solid var(--border);
+            vertical-align: middle;
+        }
+
+        .hex-offset-col {
+            color: var(--text-tertiary);
+            width: 80px;
+            white-space: nowrap;
+            user-select: none;
+        }
+
+        .hex-bytes-col {
+            display: flex;
+            gap: 4px;
+            flex-wrap: wrap;
+        }
+
+        .hex-byte-input {
+            width: 24px;
+            text-align: center;
+            background: var(--code-bg);
+            border: 1px solid var(--border);
+            color: #d1d5db;
+            font-family: var(--mono);
+            font-size: 11px;
+            padding: 2px 0;
+            border-radius: 2px;
+            outline: none;
+            text-transform: uppercase;
+        }
+
+        .hex-byte-input:focus {
+            border-color: var(--accent);
+            background: var(--surface-hover);
+        }
+
+        .hex-ascii-col {
+            color: var(--text-secondary);
+            letter-spacing: 0.1em;
+            white-space: pre;
+            width: 140px;
+            user-select: none;
+        }
+
+        .empty-state {
+            padding: 32px;
+            text-align: center;
+            color: var(--text-tertiary);
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            background: var(--surface);
+        }
+
+        .error-state {
+            padding: 14px;
+            color: var(--danger);
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            background: var(--surface);
+        }
+
+        .divider {
+            border: 0;
+            border-top: 1px solid var(--border);
+            margin: 24px 0;
+        }
+
+        .toolbar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 12px 16px;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            margin-bottom: 24px;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        .toolbar-info {
+            font-size: 13px;
+            font-weight: 500;
+            color: var(--text-primary);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .toolbar-actions {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .badge-mode {
+            font-size: 11px;
+            padding: 2px 8px;
+            border-radius: 12px;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            font-weight: 600;
+            background: var(--surface-subtle);
+            border: 1px solid var(--border);
+            color: var(--text-secondary);
+        }
+
+        .badge-mode.active {
+            background: var(--accent-soft);
+            border-color: var(--accent);
+            color: var(--accent);
+        }
+
+        .badge-match {
+            font-size: 11px;
+            padding: 2px 6px;
+            border-radius: 4px;
+            background: rgba(48, 164, 108, 0.15);
+            color: var(--success);
+            border: 1px solid rgba(48, 164, 108, 0.3);
+            font-family: var(--mono);
+        }
+
+        .badge-mismatch {
+            font-size: 11px;
+            padding: 2px 6px;
+            border-radius: 4px;
+            background: rgba(229, 72, 77, 0.15);
+            color: var(--danger);
+            border: 1px solid rgba(229, 72, 77, 0.3);
+            font-family: var(--mono);
+        }
+
+        .pdf-controls {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+            margin: 12px 0;
+            flex-wrap: wrap;
+        }
+
+        .pdf-page-indicator {
+            font-size: 12px;
+            color: var(--text-secondary);
+            font-family: var(--mono);
+        }
+
+        .diff-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            margin-top: 12px;
+        }
+
+        .diff-pane {
+            background: var(--code-bg);
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            padding: 12px;
+            font-family: var(--mono);
+            font-size: 12px;
+            line-height: 1.5;
+            overflow-x: auto;
+            max-height: 400px;
+        }
+
+        .diff-added {
+            background: rgba(48, 164, 108, 0.15);
+            color: #4ade80;
+        }
+
+        .diff-removed {
+            background: rgba(229, 72, 77, 0.15);
+            color: #f87171;
+        }
+
+        .font-tester-box {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            padding: 20px;
+            margin-top: 12px;
+        }
+
+        .font-preview-text {
+            outline: none;
+            padding: 12px;
+            background: var(--code-bg);
+            border: 1px solid var(--border);
+            border-radius: 4px;
+            color: var(--text-primary);
+            margin-top: 10px;
+            min-height: 80px;
+        }
+
+        mark.search-highlight {
+            background: #eab308;
+            color: #000000;
+            padding: 0 2px;
+            border-radius: 2px;
+        }
+
+        .palette-row {
+            display: flex;
+            gap: 10px;
+            margin-top: 12px;
+            flex-wrap: wrap;
+        }
+
+        .palette-swatch {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            cursor: pointer;
+        }
+
+        .palette-color {
+            width: 48px;
+            height: 48px;
+            border-radius: 6px;
+            border: 1px solid var(--border);
+            transition: transform 0.15s ease;
+        }
+
+        .palette-color:hover {
+            transform: scale(1.08);
+        }
+
+        .palette-label {
+            font-size: 11px;
+            font-family: var(--mono);
+            color: var(--text-secondary);
+            margin-top: 4px;
+        }
+
+        .url-loader-row {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 20px;
+        }
+
+        .url-loader-row input {
+            flex: 1;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <header>
+            <h1>FilePeek</h1>
+            <p class="subtitle">Inspect, compare, sanitize, convert, and edit file headers, entropy, archives, and hex
+                buffers</p>
+        </header>
+
+        <div class="url-loader-row">
+            <input type="text" id="url-input" placeholder="Or inspect a public web URL (CORS supported)...">
+            <button id="url-fetch-btn">Load URL</button>
+        </div>
+
+        <div id="dropZone">
+            <div class="drop-title">Drop file here</div>
+            <div class="drop-sub">or click to browse</div>
+        </div>
+
+        <input type="file" id="fileInput">
+        <input type="file" id="diffFileInput" style="display:none;">
+
+        <div id="output">
+            <div class="empty-state">No file loaded</div>
+        </div>
+    </div>
+
+    <script type="module">
+        const fileInput = document.getElementById('fileInput');
+        const diffFileInput = document.getElementById('diffFileInput');
+        const dropZone = document.getElementById('dropZone');
+        const outputDiv = document.getElementById('output');
+        const urlInput = document.getElementById('url-input');
+        const urlFetchBtn = document.getElementById('url-fetch-btn');
+
+        let currentFile = null;
+        let isEditMode = false;
+        let activeEditorData = null;
+
+        fileInput.addEventListener('change', () => {
+            const file = fileInput.files[0];
+            if (file) {
+                currentFile = file;
+                isEditMode = false;
+                inspectFile(file);
+            }
+        });
+
+        dropZone.addEventListener('click', () => {
+            fileInput.click();
+        });
+
+        dropZone.addEventListener('dragover', (event) => {
+            event.preventDefault();
+            dropZone.classList.add('dragging');
+        });
+
+        dropZone.addEventListener('dragleave', () => {
+            dropZone.classList.remove('dragging');
+        });
+
+        dropZone.addEventListener('drop', (event) => {
+            event.preventDefault();
+            dropZone.classList.remove('dragging');
+            const file = event.dataTransfer.files[0];
+            if (file) {
+                currentFile = file;
+                isEditMode = false;
+                inspectFile(file);
+            }
+        });
+
+        if (urlFetchBtn && urlInput) {
+            urlFetchBtn.addEventListener('click', async () => {
+                const url = urlInput.value.trim();
+                if (!url) return;
+                urlFetchBtn.disabled = true;
+                urlFetchBtn.textContent = 'Fetching...';
+                try {
+                    const response = await fetch(url);
+                    if (!response.ok) throw new Error(`HTTP ${response.status}`);
+                    const blob = await response.blob();
+                    const urlParts = url.split('/');
+                    const filename = urlParts[urlParts.length - 1].split('?')[0] || 'remote_file';
+                    const fetchedFile = new File([blob], filename, { type: blob.type });
+                    currentFile = fetchedFile;
+                    isEditMode = false;
+                    inspectFile(fetchedFile);
+                } catch (err) {
+                    alert(`Failed to load URL: ${err.message}. Check CORS permissions.`);
+                } finally {
+                    urlFetchBtn.disabled = false;
+                    urlFetchBtn.textContent = 'Load URL';
+                }
+            });
+        }
+
+        async function inspectFile(file) {
+            outputDiv.innerHTML = '<div class="empty-state">Analyzing file headers, entropy, and structures...</div>';
+
+            try {
+                const ext = getFileExtension(file.name);
+                const mime = file.type || '';
+
+                let toolbarHtml = `
+                    <div class="toolbar">
+                        <div class="toolbar-info">
+                            <span>${escapeHtml(file.name)}</span>
+                            <span class="badge-mode ${isEditMode ? 'active' : ''}">${isEditMode ? 'Edit Mode' : 'View Mode'}</span>
+                        </div>
+                        <div class="toolbar-actions">
+                            <button id="compare-file-btn">Compare with File (Diff)</button>
+                            <button id="toggle-edit-mode-btn" class="${isEditMode ? '' : 'btn-primary'}">
+                                ${isEditMode ? 'Switch to View Mode' : 'Edit Mode'}
+                            </button>
+                            ${isEditMode ? `<button id="download-edited-btn" class="btn-primary">Download Modified File</button>` : ''}
+                        </div>
+                    </div>
+                    <div id="diff-section-container"></div>
+                `;
+
+                const sections = [];
+                const bufferHeader = await file.slice(0, 16).arrayBuffer();
+                const magicInfo = detectMagicSignature(new Uint8Array(bufferHeader), ext);
+
+                sections.push(renderBasicFileInfo(file, magicInfo));
+                sections.push(renderHashSection(file));
+                sections.push(await renderEntropySection(file));
+                sections.push(await renderBase64Section(file));
+
+                if (isSvg(mime, ext)) {
+                    sections.push(await handleSvg(file));
+                } else if (isFont(mime, ext)) {
+                    sections.push(await handleFont(file));
+                } else if (isZipArchive(mime, ext, magicInfo)) {
+                    sections.push(await handleArchive(file));
+                } else if (isImage(mime, ext, magicInfo)) {
+                    sections.push(await handleImage(file));
+                } else if (isPdf(mime, ext, magicInfo)) {
+                    sections.push(await handlePdf(file));
+                } else if (isAudio(mime, ext)) {
+                    sections.push(await handleAudio(file));
+                } else if (isVideo(mime, ext)) {
+                    sections.push(await handleVideo(file));
+                } else if (isHtml(mime, ext)) {
+                    sections.push(await handleHtml(file));
+                } else if (isMarkdown(mime, ext)) {
+                    sections.push(await handleMarkdown(file));
+                } else if (isDelimitedTable(ext)) {
+                    sections.push(await handleDelimitedTable(file, ext));
+                } else if (isJsonFile(mime, ext)) {
+                    sections.push(await handleJson(file));
+                } else if (isText(mime, ext)) {
+                    sections.push(await handleText(file));
+                } else {
+                    sections.push(await handleBinary(file));
+                }
+
+                outputDiv.innerHTML = toolbarHtml + sections.join('<div class="divider"></div>');
+
+                wireToolbarEvents();
+                computeAndRenderHashes(file);
+
+            } catch (error) {
+                outputDiv.innerHTML = `<div class="error-state">Error: ${escapeHtml(error.message)}</div>`;
+            }
+        }
+
+        function wireToolbarEvents() {
+            const toggleBtn = document.getElementById('toggle-edit-mode-btn');
+            const downloadBtn = document.getElementById('download-edited-btn');
+            const compareBtn = document.getElementById('compare-file-btn');
+
+            if (toggleBtn) {
+                toggleBtn.addEventListener('click', () => {
+                    isEditMode = !isEditMode;
+                    inspectFile(currentFile);
+                });
+            }
+
+            if (downloadBtn) {
+                downloadBtn.addEventListener('click', () => {
+                    saveAndDownloadCurrent();
+                });
+            }
+
+            if (compareBtn) {
+                compareBtn.addEventListener('click', () => {
+                    diffFileInput.click();
+                });
+            }
+        }
+
+        diffFileInput.addEventListener('change', async () => {
+            const diffFile = diffFileInput.files[0];
+            if (!diffFile || !currentFile) return;
+
+            const diffContainer = document.getElementById('diff-section-container');
+            if (!diffContainer) return;
+
+            diffContainer.innerHTML = '<div class="empty-state">Comparing files...</div>';
+
+            try {
+                const ext1 = getFileExtension(currentFile.name);
+                const ext2 = getFileExtension(diffFile.name);
+                const isTextual = isText(currentFile.type || '', ext1) && isText(diffFile.type || '', ext2);
+
+                if (isTextual) {
+                    const text1 = await currentFile.text();
+                    const text2 = await diffFile.text();
+                    const lines1 = text1.split(/\r\n|\r|\n/);
+                    const lines2 = text2.split(/\r\n|\r|\n/);
+
+                    let out1 = '';
+                    let out2 = '';
+                    const maxLines = Math.max(lines1.length, lines2.length);
+
+                    for (let i = 0; i < maxLines; i++) {
+                        const l1 = lines1[i] !== undefined ? lines1[i] : '';
+                        const l2 = lines2[i] !== undefined ? lines2[i] : '';
+
+                        if (l1 !== l2) {
+                            out1 += `<div class="diff-removed">- ${escapeHtml(l1 || ' ')}</div>`;
+                            out2 += `<div class="diff-added">+ ${escapeHtml(l2 || ' ')}</div>`;
+                        } else {
+                            out1 += `<div>  ${escapeHtml(l1 || ' ')}</div>`;
+                            out2 += `<div>  ${escapeHtml(l2 || ' ')}</div>`;
+                        }
+                    }
+
+                    diffContainer.innerHTML = `
+                        <div class="section-block">
+                            <div class="section-header-row">
+                                <div class="section-header">Text Diff: ${escapeHtml(currentFile.name)} vs ${escapeHtml(diffFile.name)}</div>
+                            </div>
+                            <div class="diff-container">
+                                <div class="diff-pane">${out1}</div>
+                                <div class="diff-pane">${out2}</div>
+                            </div>
+                        </div>
+                        <div class="divider"></div>
+                    `;
+                } else {
+                    const buf1 = await currentFile.slice(0, 1024).arrayBuffer();
+                    const buf2 = await diffFile.slice(0, 1024).arrayBuffer();
+                    const b1 = new Uint8Array(buf1);
+                    const b2 = new Uint8Array(buf2);
+
+                    let dump1 = '';
+                    let dump2 = '';
+                    const limit = Math.min(1024, Math.max(b1.length, b2.length));
+
+                    for (let i = 0; i < limit; i += 16) {
+                        const offset = i.toString(16).padStart(8, '0');
+                        let row1 = '';
+                        let row2 = '';
+
+                        for (let j = 0; j < 16; j++) {
+                            const idx = i + j;
+                            const byte1 = b1[idx];
+                            const byte2 = b2[idx];
+                            const hex1 = byte1 !== undefined ? byte1.toString(16).padStart(2, '0').toUpperCase() : '  ';
+                            const hex2 = byte2 !== undefined ? byte2.toString(16).padStart(2, '0').toUpperCase() : '  ';
+
+                            if (byte1 !== byte2) {
+                                row1 += `<span class="diff-removed">${hex1}</span> `;
+                                row2 += `<span class="diff-added">${hex2}</span> `;
+                            } else {
+                                row1 += `${hex1} `;
+                                row2 += `${hex2} `;
+                            }
+                        }
+
+                        dump1 += `${offset}  ${row1}\n`;
+                        dump2 += `${offset}  ${row2}\n`;
+                    }
+
+                    diffContainer.innerHTML = `
+                        <div class="section-block">
+                            <div class="section-header-row">
+                                <div class="section-header">Binary Hex Diff (First 1 KB): ${escapeHtml(currentFile.name)} vs ${escapeHtml(diffFile.name)}</div>
+                            </div>
+                            <div class="diff-container">
+                                <div class="diff-pane"><pre>${dump1}</pre></div>
+                                <div class="diff-pane"><pre>${dump2}</pre></div>
+                            </div>
+                        </div>
+                        <div class="divider"></div>
+                    `;
+                }
+            } catch (err) {
+                diffContainer.innerHTML = `<div class="error-state">Diff failed: ${escapeHtml(err.message)}</div>`;
+            }
+        });
+
+        function triggerDownload(blob, filename) {
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = filename;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        }
+
+        function saveAndDownloadCurrent() {
+            if (!currentFile || !activeEditorData) return;
+
+            if (activeEditorData.type === 'text') {
+                const textarea = document.getElementById('text-editor-input');
+                const content = textarea ? textarea.value : activeEditorData.content;
+                const blob = new Blob([content], { type: currentFile.type || 'text/plain' });
+                triggerDownload(blob, currentFile.name);
+            } else if (activeEditorData.type === 'binary') {
+                const blob = new Blob([activeEditorData.bytes], { type: currentFile.type || 'application/octet-stream' });
+                triggerDownload(blob, currentFile.name);
+            }
+        }
+
+        function getFileExtension(filename) {
+            const dot = filename.lastIndexOf('.');
+            return dot !== -1 ? filename.substring(dot + 1).toLowerCase() : '';
+        }
+
+        function formatBytes(bytes) {
+            if (bytes === 0) return '0 Bytes';
+            const k = 1024;
+            const sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB'];
+            const i = Math.floor(Math.log(bytes) / Math.log(k));
+            return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+        }
+
+        function formatDuration(seconds) {
+            if (!isFinite(seconds) || isNaN(seconds)) return 'Unknown';
+            const mins = Math.floor(seconds / 60);
+            const secs = Math.floor(seconds % 60);
+            const ms = Math.floor((seconds % 1) * 1000);
+            return `${mins}m ${secs}s ${ms}ms (${seconds.toFixed(2)}s)`;
+        }
+
+        function detectMagicSignature(bytes, ext) {
+            const hex = Array.from(bytes).map(b => b.toString(16).padStart(2, '0').toUpperCase()).join(' ');
+
+            const signatures = [
+                { hex: '89 50 4E 47 0D 0A 1A 0A', name: 'PNG Image', expected: ['png'] },
+                { hex: 'FF D8 FF', name: 'JPEG Image', expected: ['jpg', 'jpeg'] },
+                { hex: '47 49 46 38', name: 'GIF Image', expected: ['gif'] },
+                { hex: '52 49 46 46', name: 'RIFF Container (WEBP/WAV/AVI)', expected: ['webp', 'wav', 'avi'] },
+                { hex: '25 50 44 46', name: 'PDF Document', expected: ['pdf'] },
+                { hex: '50 4B 03 04', name: 'ZIP Archive / Office Open XML', expected: ['zip', 'docx', 'xlsx', 'pptx', 'jar', 'apk', 'epub'] },
+                { hex: '4D 5A', name: 'DOS MZ / PE Windows Executable', expected: ['exe', 'dll', 'sys', 'ocx'] },
+                { hex: '7F 45 4C 46', name: 'ELF Executable / Linux Binary', expected: ['so', 'elf', 'bin', ''] },
+                { hex: '1F 8B 08', name: 'GZIP Compressed Archive', expected: ['gz', 'tgz'] },
+                { hex: '42 5A 68', name: 'BZIP2 Compressed Archive', expected: ['bz2'] },
+                { hex: '75 73 74 61 72', name: 'TAR Archive', expected: ['tar'] },
+                { hex: '37 7A BC AF 27 1C', name: '7-Zip Archive', expected: ['7z'] },
+                { hex: '4F 67 67 53', name: 'OGG Multimedia Container', expected: ['ogg', 'oga', 'ogv'] },
+                { hex: '1A 45 DF A3', name: 'Matroska / WebM Container', expected: ['mkv', 'webm'] },
+                { hex: '49 44 33', name: 'MP3 Audio (ID3v2 tag)', expected: ['mp3'] },
+                { hex: '77 4F 46 46', name: 'WOFF Font', expected: ['woff'] },
+                { hex: '77 4F 46 32', name: 'WOFF2 Font', expected: ['woff2'] },
+                { hex: '00 01 00 00', name: 'TrueType Font', expected: ['ttf'] },
+                { hex: '4F 54 54 4F', name: 'OpenType Font', expected: ['otf'] }
+            ];
+
+            for (const sig of signatures) {
+                const sigBytes = sig.hex.split(' ');
+                let match = true;
+                for (let i = 0; i < sigBytes.length; i++) {
+                    if (bytes[i] !== parseInt(sigBytes[i], 16)) {
+                        match = false;
+                        break;
+                    }
+                }
+                if (match) {
+                    const matchesExt = sig.expected.includes(ext);
+                    return {
+                        name: sig.name,
+                        signature: sig.hex,
+                        matchesExt: matchesExt,
+                        detected: true
+                    };
+                }
+            }
+
+            return {
+                name: 'Unknown Signature',
+                signature: hex.substring(0, 23),
+                matchesExt: true,
+                detected: false
+            };
+        }
+
+        function isZipArchive(mime, ext, magic) {
+            if (magic && magic.detected && magic.name.includes('ZIP')) return true;
+            return ['zip', 'jar', 'apk', 'docx', 'xlsx', 'pptx', 'epub'].includes(ext);
+        }
+
+        function isSvg(mime, ext) {
+            return ext === 'svg' || mime === 'image/svg+xml';
+        }
+
+        function isFont(mime, ext) {
+            return ['ttf', 'otf', 'woff', 'woff2'].includes(ext) || mime.startsWith('font/');
+        }
+
+        function isImage(mime, ext, magic) {
+            if (magic && magic.detected && magic.name.includes('Image')) return true;
+            return mime.startsWith('image/') ||
+                ['jpg', 'jpeg', 'png', 'gif', 'webp', 'bmp', 'tiff', 'tif', 'heic', 'heif', 'avif'].includes(ext);
+        }
+
+        function isPdf(mime, ext, magic) {
+            if (magic && magic.detected && magic.name.includes('PDF')) return true;
+            return mime === 'application/pdf' || ext === 'pdf';
+        }
+
+        function isAudio(mime, ext) {
+            return mime.startsWith('audio/') ||
+                ['mp3', 'wav', 'ogg', 'aac', 'flac', 'm4a', 'weba'].includes(ext);
+        }
+
+        function isVideo(mime, ext) {
+            return mime.startsWith('video/') ||
+                ['mp4', 'webm', 'ogg', 'mov', 'avi', 'mkv', 'flv'].includes(ext);
+        }
+
+        function isHtml(mime, ext) {
+            return mime === 'text/html' || ['html', 'htm', 'xhtml'].includes(ext);
+        }
+
+        function isMarkdown(mime, ext) {
+            return mime === 'text/markdown' || ['md', 'markdown', 'mdown', 'mkd'].includes(ext);
+        }
+
+        function isDelimitedTable(ext) {
+            return ['csv', 'tsv'].includes(ext);
+        }
+
+        function isJsonFile(mime, ext) {
+            return mime === 'application/json' || ext === 'json';
+        }
+
+        function isText(mime, ext) {
+            if (
+                mime.startsWith('text/') ||
+                mime === 'application/javascript' ||
+                mime === 'application/xml'
+            ) {
+                return true;
+            }
+
+            const textExtensions = [
+                'txt', 'md', 'json', 'js', 'mjs', 'ts', 'jsx', 'tsx', 'html', 'htm', 'css',
+                'scss', 'less', 'xml', 'svg', 'csv', 'tsv', 'yaml', 'yml', 'ini', 'cfg',
+                'conf', 'env', 'sh', 'bat', 'cmd', 'ps1', 'py', 'rb', 'java', 'c', 'cpp',
+                'h', 'hpp', 'cs', 'go', 'rs', 'php', 'sql', 'log'
+            ];
+
+            return textExtensions.includes(ext);
+        }
+
+        function renderBasicFileInfo(file, magic) {
+            const modified = file.lastModified ? new Date(file.lastModified).toISOString().replace('T', ' ').replace('Z', ' UTC') : 'Unknown';
+            const sigStatus = magic.detected
+                ? (magic.matchesExt ? `<span class="badge-match">Matches File Extension</span>` : `<span class="badge-mismatch">Mismatch: Expected ${escapeHtml(magic.name)}</span>`)
+                : '';
+
+            return `
+                <div class="section-block">
+                    <div class="section-header-row">
+                        <div class="section-header">File Information</div>
+                    </div>
+                    <div class="table-wrap">
+                        <table>
+                            <tbody>
+                                <tr>
+                                    <td class="cell-key">Name</td>
+                                    <td class="cell-val">${escapeHtml(file.name)}</td>
+                                </tr>
+                                <tr>
+                                    <td class="cell-key">Size</td>
+                                    <td class="cell-val">${escapeHtml(formatBytes(file.size))} (${file.size.toLocaleString()} bytes)</td>
+                                </tr>
+                                <tr>
+                                    <td class="cell-key">MIME Type</td>
+                                    <td class="cell-val">${escapeHtml(file.type || 'Unknown')}</td>
+                                </tr>
+                                <tr>
+                                    <td class="cell-key">Magic Header</td>
+                                    <td class="cell-val">${escapeHtml(magic.name)} (${escapeHtml(magic.signature)}) ${sigStatus}</td>
+                                </tr>
+                                <tr>
+                                    <td class="cell-key">Modified</td>
+                                    <td class="cell-val">${escapeHtml(modified)}</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            `;
+        }
+
+        function renderHashSection(file) {
+            return `
+                <div class="section-block">
+                    <div class="section-header-row">
+                        <div class="section-header">Cryptographic Hashes & Integrity</div>
+                    </div>
+                    <div class="table-wrap">
+                        <table>
+                            <tbody>
+                                <tr>
+                                    <td class="cell-key">SHA-256</td>
+                                    <td class="cell-val cell-mono" id="hash-sha256">Computing...</td>
+                                </tr>
+                                <tr>
+                                    <td class="cell-key">SHA-1</td>
+                                    <td class="cell-val cell-mono" id="hash-sha1">Computing...</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            `;
+        }
+
+        async function computeAndRenderHashes(file) {
+            try {
+                const buffer = await file.arrayBuffer();
+                const sha256Buffer = await crypto.subtle.digest('SHA-256', buffer);
+                const sha1Buffer = await crypto.subtle.digest('SHA-1', buffer);
+
+                const sha256Hex = Array.from(new Uint8Array(sha256Buffer)).map(b => b.toString(16).padStart(2, '0')).join('');
+                const sha1Hex = Array.from(new Uint8Array(sha1Buffer)).map(b => b.toString(16).padStart(2, '0')).join('');
+
+                const elSha256 = document.getElementById('hash-sha256');
+                const elSha1 = document.getElementById('hash-sha1');
+                if (elSha256) elSha256.textContent = sha256Hex;
+                if (elSha1) elSha1.textContent = sha1Hex;
+            } catch (err) {
+                const elSha256 = document.getElementById('hash-sha256');
+                if (elSha256) elSha256.textContent = 'Hash error';
+            }
+        }
+
+        async function renderEntropySection(file) {
+            const scanLimit = Math.min(file.size, 65536);
+            const sliceBuffer = await file.slice(0, scanLimit).arrayBuffer();
+            const bytes = new Uint8Array(sliceBuffer);
+
+            const counts = new Uint32Array(256);
+            for (let i = 0; i < bytes.length; i++) {
+                counts[bytes[i]]++;
+            }
+
+            let entropy = 0;
+            const len = bytes.length;
+            if (len > 0) {
+                for (let i = 0; i < 256; i++) {
+                    if (counts[i] > 0) {
+                        const p = counts[i] / len;
+                        entropy -= p * Math.log2(p);
+                    }
+                }
+            }
+
+            let entropyCategory = 'Normal Text/Code (3.5 - 5.5)';
+            if (entropy > 7.5) {
+                entropyCategory = 'High Entropy (Encrypted, Compressed, or Packed)';
+            } else if (entropy < 3.0) {
+                entropyCategory = 'Low Entropy (Repetitive or Sparse)';
+            }
+
+            setTimeout(() => {
+                const canvas = document.getElementById('entropy-histogram-canvas');
+                if (canvas && len > 0) {
+                    const ctx = canvas.getContext('2d');
+                    ctx.clearRect(0, 0, canvas.width, canvas.height);
+                    let maxCount = 0;
+                    for (let i = 0; i < 256; i++) {
+                        if (counts[i] > maxCount) maxCount = counts[i];
+                    }
+
+                    const barWidth = canvas.width / 256;
+                    for (let i = 0; i < 256; i++) {
+                        const h = (counts[i] / maxCount) * canvas.height;
+                        ctx.fillStyle = '#4f75ff';
+                        ctx.fillRect(i * barWidth, canvas.height - h, barWidth, h);
+                    }
+                }
+            }, 0);
+
+            return `
+                <div class="section-block">
+                    <div class="section-header-row">
+                        <div class="section-header">Shannon Entropy & Randomness Distribution</div>
+                    </div>
+                    <div class="table-wrap">
+                        <table>
+                            <tbody>
+                                <tr>
+                                    <td class="cell-key">Calculated Entropy</td>
+                                    <td class="cell-val"><strong>${entropy.toFixed(3)}</strong> / 8.000 bits per byte</td>
+                                </tr>
+                                <tr>
+                                    <td class="cell-key">Assessment</td>
+                                    <td class="cell-val">${escapeHtml(entropyCategory)}</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="sub-header">Byte Value Frequency Histogram (0x00 to 0xFF)</div>
+                    <canvas id="entropy-histogram-canvas" class="dark-canvas" width="512" height="64"></canvas>
+                </div>
+            `;
+        }
+
+        async function renderBase64Section(file) {
+            const maxBase64Size = 512 * 1024;
+            const isTooLarge = file.size > maxBase64Size;
+
+            setTimeout(() => {
+                const copyBtn = document.getElementById('copy-base64-btn');
+                const base64Pre = document.getElementById('base64-text');
+                if (copyBtn && base64Pre) {
+                    copyBtn.addEventListener('click', () => {
+                        navigator.clipboard.writeText(base64Pre.textContent);
+                        copyBtn.textContent = 'Copied!';
+                        setTimeout(() => copyBtn.textContent = 'Copy Data URI', 1500);
+                    });
+                }
+            }, 0);
+
+            if (isTooLarge) {
+                return `
+                    <div class="section-block">
+                        <div class="section-header-row">
+                            <div class="section-header">Base64 Data URI</div>
+                        </div>
+                        <div class="empty-state">File exceeds 512 KB limit for live Base64 display (${formatBytes(file.size)})</div>
+                    </div>
+                `;
+            }
+
+            const buffer = await file.arrayBuffer();
+            let binary = '';
+            const bytes = new Uint8Array(buffer);
+            for (let i = 0; i < bytes.byteLength; i++) {
+                binary += String.fromCharCode(bytes[i]);
+            }
+            const base64 = btoa(binary);
+            const dataUri = `data:${file.type || 'application/octet-stream'};base64,${base64}`;
+
+            return `
+                <div class="section-block">
+                    <div class="section-header-row">
+                        <div class="section-header">Base64 Data URI (${formatBytes(dataUri.length)})</div>
+                        <div>
+                            <button id="copy-base64-btn">Copy Data URI</button>
+                        </div>
+                    </div>
+                    <pre id="base64-text" style="max-height: 120px;">${escapeHtml(dataUri)}</pre>
+                </div>
+            `;
+        }
+
+        async function handleArchive(file) {
+            let html = `
+                <div class="section-block">
+                    <div class="section-header-row">
+                        <div class="section-header">Archive Contents & Direct Extraction</div>
+                    </div>
+            `;
+
+            try {
+                const zip = await JSZip.loadAsync(file);
+                const entries = Object.values(zip.files);
+
+                let rowsHtml = '';
+                entries.forEach((entry, idx) => {
+                    const isDir = entry.dir;
+                    const date = entry.date ? entry.date.toISOString().split('T')[0] : '-';
+                    const size = isDir ? '-' : formatBytes(entry._data ? entry._data.uncompressedSize : 0);
+                    const actionBtn = isDir ? '' : `<button class="archive-extract-btn" data-entry-name="${escapeHtml(entry.name)}">Extract</button>`;
+
+                    rowsHtml += `
+                        <tr>
+                            <td class="cell-val" style="font-family: var(--mono);">${escapeHtml(entry.name)}</td>
+                            <td class="cell-key">${isDir ? 'Directory' : 'File'}</td>
+                            <td class="cell-key">${escapeHtml(size)}</td>
+                            <td class="cell-key">${escapeHtml(date)}</td>
+                            <td>${actionBtn}</td>
+                        </tr>
+                    `;
+                });
+
+                html += `
+                    <div class="table-wrap">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Entry Name</th>
+                                    <th>Type</th>
+                                    <th>Size</th>
+                                    <th>Date</th>
+                                    <th>Action</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                ${rowsHtml}
+                            </tbody>
+                        </table>
+                    </div>
+                `;
+
+                setTimeout(() => {
+                    const buttons = document.querySelectorAll('.archive-extract-btn');
+                    buttons.forEach(btn => {
+                        btn.addEventListener('click', async () => {
+                            const entryName = btn.dataset.entryName;
+                            btn.disabled = true;
+                            btn.textContent = 'Extracting...';
+                            const fileData = await zip.file(entryName).async('blob');
+                            const baseName = entryName.split('/').pop() || 'extracted_file';
+                            triggerDownload(fileData, baseName);
+                            btn.disabled = false;
+                            btn.textContent = 'Extract';
+                        });
+                    });
+                }, 0);
+
+            } catch (err) {
+                html += `<div class="error-state">Failed to unpack archive: ${escapeHtml(err.message)}</div>`;
+            }
+
+            if (isEditMode) {
+                html += `
+                    <div class="divider"></div>
+                    <div class="section-header-row">
+                        <div class="section-header">Binary Byte Editor</div>
+                    </div>
+                    ${await renderHexEditor(file)}
+                `;
+            }
+
+            html += `</div>`;
+            return html;
+        }
+
+        async function handleSvg(file) {
+            const fullText = await file.text();
+            activeEditorData = { type: 'text', content: fullText };
+
+            let elementCount = 0;
+            let pathCount = 0;
+            let viewBox = 'None';
+            try {
+                const parser = new DOMParser();
+                const doc = parser.parseFromString(fullText, 'image/svg+xml');
+                const svgEl = doc.querySelector('svg');
+                if (svgEl) {
+                    elementCount = svgEl.querySelectorAll('*').length;
+                    pathCount = svgEl.querySelectorAll('path').length;
+                    viewBox = svgEl.getAttribute('viewBox') || 'None';
+                }
+            } catch (e) { }
+
+            setTimeout(() => {
+                const minifyBtn = document.getElementById('svg-minify-btn');
+                if (minifyBtn) {
+                    minifyBtn.addEventListener('click', () => {
+                        // Who needs a 300KB AST parser when two unapologetic regular expressions
+                        // can strip XML comments and tag whitespace without asking questions.
+                        let minified = fullText.replace(new RegExp('<!--[\\s\\S]*?-->', 'g'), '');
+                        minified = minified.replace(new RegExp('>\\s+<', 'g'), '><').trim();
+                        triggerDownload(new Blob([minified], { type: 'image/svg+xml' }), 'minified_' + file.name);
+                    });
+                }
+            }, 0);
+
+            let html = `
+                <div class="section-block">
+                    <div class="section-header-row">
+                        <div class="section-header">Vector SVG Metrics & Minifier</div>
+                        <div>
+                            <button id="svg-minify-btn" class="btn-success">Download Minified SVG</button>
+                        </div>
+                    </div>
+                    <div class="table-wrap">
+                        <table>
+                            <tbody>
+                                <tr>
+                                    <td class="cell-key">ViewBox</td>
+                                    <td class="cell-val">${escapeHtml(viewBox)}</td>
+                                </tr>
+                                <tr>
+                                    <td class="cell-key">Total Elements</td>
+                                    <td class="cell-val">${elementCount}</td>
+                                </tr>
+                                <tr>
+                                    <td class="cell-key">Path Count</td>
+                                    <td class="cell-val">${pathCount}</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="sub-header">Vector Rendering</div>
+                    <div style="background:var(--surface);border:1px solid var(--border);border-radius:6px;padding:24px;text-align:center;">
+                        <img src="${URL.createObjectURL(file)}" style="max-height:300px;margin:0 auto;" alt="SVG Preview">
+                    </div>
+            `;
+
+            if (isEditMode) {
+                html += `
+                    <div class="sub-header">SVG XML Source Editor</div>
+                    <textarea id="text-editor-input" class="editor-textarea">${escapeHtml(fullText)}</textarea>
+                `;
+                setTimeout(() => {
+                    const textarea = document.getElementById('text-editor-input');
+                    if (textarea) {
+                        textarea.addEventListener('input', () => {
+                            activeEditorData.content = textarea.value;
+                        });
+                    }
+                }, 0);
+            }
+
+            html += `</div>`;
+            return html;
+        }
+
+        async function handleFont(file) {
+            // Yes, we generate a random font family name on the fly because if you load two fonts
+            // with the same generic identifier, the browser silently shrugs and you end up inspecting Comic Sans.
+            const fontUrl = URL.createObjectURL(file);
+            const fontName = 'FilePeekFont_' + Math.random().toString(36).substring(2, 7);
+
+            try {
+                const fontFace = new FontFace(fontName, `url(${fontUrl})`);
+                await fontFace.load();
+                document.fonts.add(fontFace);
+            } catch (err) {
+                return `<div class="error-state">Failed to load font face: ${escapeHtml(err.message)}</div>`;
+            }
+
+            setTimeout(() => {
+                const slider = document.getElementById('font-size-slider');
+                const label = document.getElementById('font-size-label');
+                const preview = document.getElementById('font-preview-area');
+                if (slider && preview) {
+                    slider.addEventListener('input', () => {
+                        const sz = slider.value + 'px';
+                        preview.style.fontSize = sz;
+                        if (label) label.textContent = sz;
+                    });
+                }
+            }, 0);
+
+            return `
+                <div class="section-block">
+                    <div class="section-header-row">
+                        <div class="section-header">Font Typography Tester</div>
+                    </div>
+                    <div class="font-tester-box">
+                        <div class="btn-row">
+                            <label style="color:var(--text-secondary);font-size:12px;">Size: </label>
+                            <input type="range" id="font-size-slider" min="12" max="72" value="28">
+                            <span id="font-size-label" style="font-family:var(--mono);font-size:12px;">28px</span>
+                        </div>
+                        <div id="font-preview-area" class="font-preview-text" contenteditable="true" style="font-family: '${fontName}', sans-serif; font-size: 28px;">
+                            Sphinx of black quartz, judge my vow. 1234567890 !@#$%^&*()
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        async function handleImage(file) {
+            let html = `
+                <div class="section-block">
+                    <div class="section-header-row">
+                        <div class="section-header">Image Metadata, Privacy & Converter</div>
+                    </div>
+                    <div class="btn-row">
+                        <button id="sanitize-exif-btn" class="btn-success">Strip EXIF & Clean</button>
+                        <select id="image-convert-format">
+                            <option value="image/png">Convert to PNG</option>
+                            <option value="image/jpeg">Convert to JPEG</option>
+                            <option value="image/webp">Convert to WEBP</option>
+                        </select>
+                        <button id="image-convert-btn">Export Converted</button>
+                    </div>
+            `;
+
+            try {
+                const tags = await ExifReader.load(file);
+                const keys = Object.keys(tags).sort();
+
+                if (keys.length === 0) {
+                    html += `<div class="empty-state">No EXIF metadata found</div>`;
+                } else {
+                    html += `
+                        <div class="table-wrap">
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>Tag</th>
+                                        <th>Value</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                    `;
+
+                    for (const key of keys) {
+                        const tag = tags[key];
+                        let val = tag.description ?? tag.value;
+
+                        if (typeof val === 'object' && val !== null) {
+                            val = JSON.stringify(val);
+                        }
+
+                        html += `
+                            <tr>
+                                <td class="cell-key">${escapeHtml(key)}</td>
+                                <td class="cell-val">${escapeHtml(String(val))}</td>
+                            </tr>
+                        `;
+                    }
+
+                    html += `
+                                </tbody>
+                            </table>
+                        </div>
+                    `;
+                }
+            } catch (err) {
+                html += `<div class="error-state">Failed to read EXIF: ${escapeHtml(err.message)}</div>`;
+            }
+
+            const objectUrl = URL.createObjectURL(file);
+            html += `
+                    <div class="sub-header">Dominant Color Palette</div>
+                    <div id="palette-swatches-container" class="palette-row"></div>
+                    <div class="sub-header">Preview</div>
+                    <img id="image-element" src="${objectUrl}" alt="Preview">
+            `;
+
+            setTimeout(() => {
+                const cleanBtn = document.getElementById('sanitize-exif-btn');
+                const convertBtn = document.getElementById('image-convert-btn');
+                const formatSelect = document.getElementById('image-convert-format');
+                const img = document.getElementById('image-element');
+                const paletteContainer = document.getElementById('palette-swatches-container');
+
+                if (img) {
+                    img.addEventListener('load', () => {
+                        try {
+                            const c = document.createElement('canvas');
+                            const cx = c.getContext('2d');
+                            c.width = 100;
+                            c.height = 100;
+                            cx.drawImage(img, 0, 0, 100, 100);
+                            const imgData = cx.getImageData(0, 0, 100, 100).data;
+                            const colors = extractPalette(imgData, 6);
+
+                            if (paletteContainer) {
+                                paletteContainer.innerHTML = colors.map(hex => `
+                                    <div class="palette-swatch" onclick="navigator.clipboard.writeText('${hex}')" title="Click to copy Hex">
+                                        <div class="palette-color" style="background:${hex};"></div>
+                                        <span class="palette-label">${hex}</span>
+                                    </div>
+                                `).join('');
+                            }
+                        } catch (e) { }
+                    });
+                }
+
+                if (cleanBtn && img) {
+                    cleanBtn.addEventListener('click', () => {
+                        const canvas = document.createElement('canvas');
+                        canvas.width = img.naturalWidth || 800;
+                        canvas.height = img.naturalHeight || 600;
+                        const ctx = canvas.getContext('2d');
+                        ctx.drawImage(img, 0, 0);
+                        canvas.toBlob((blob) => {
+                            if (blob) {
+                                triggerDownload(blob, 'clean_' + file.name);
+                            }
+                        }, file.type || 'image/png');
+                    });
+                }
+
+                if (convertBtn && img && formatSelect) {
+                    convertBtn.addEventListener('click', () => {
+                        const canvas = document.createElement('canvas');
+                        canvas.width = img.naturalWidth || 800;
+                        canvas.height = img.naturalHeight || 600;
+                        const ctx = canvas.getContext('2d');
+                        ctx.drawImage(img, 0, 0);
+                        const mimeChoice = formatSelect.value;
+                        const extChoice = mimeChoice.split('/')[1];
+                        canvas.toBlob((blob) => {
+                            if (blob) {
+                                const base = file.name.substring(0, file.name.lastIndexOf('.')) || 'converted';
+                                triggerDownload(blob, `${base}.${extChoice}`);
+                            }
+                        }, mimeChoice, 0.92);
+                    });
+                }
+            }, 0);
+
+            if (isEditMode) {
+                html += `
+                    <div class="divider"></div>
+                    <div class="section-header-row">
+                        <div class="section-header">Binary Byte Editor</div>
+                    </div>
+                    ${await renderHexEditor(file)}
+                `;
+            }
+
+            html += `</div>`;
+            return html;
+        }
+
+        function extractPalette(data, numColors) {
+            const colorCounts = {};
+            for (let i = 0; i < data.length; i += 16) {
+                const r = Math.round(data[i] / 32) * 32;
+                const g = Math.round(data[i + 1] / 32) * 32;
+                const b = Math.round(data[i + 2] / 32) * 32;
+                const hex = '#' + [r, g, b].map(x => x.toString(16).padStart(2, '0')).join('').toUpperCase();
+                colorCounts[hex] = (colorCounts[hex] || 0) + 1;
+            }
+            return Object.keys(colorCounts).sort((a, b) => colorCounts[b] - colorCounts[a]).slice(0, numColors);
+        }
+
+        async function handlePdf(file) {
+            let html = `
+                <div class="section-block">
+                    <div class="section-header-row">
+                        <div class="section-header">Document Metadata</div>
+                        <div>
+                            <button id="pdf-extract-txt-btn">Export All Text (.txt)</button>
+                        </div>
+                    </div>
+            `;
+
+            const arrayBuffer = await file.arrayBuffer();
+
+            try {
+                const loadingTask = pdfjsLib.getDocument({ data: arrayBuffer });
+                const pdfDoc = await loadingTask.promise;
+                const metadata = await pdfDoc.getMetadata().catch(() => null);
+
+                html += `
+                    <div class="table-wrap">
+                        <table>
+                            <tbody>
+                                <tr>
+                                    <td class="cell-key">Pages</td>
+                                    <td class="cell-val">${pdfDoc.numPages}</td>
+                                </tr>
+                `;
+
+                if (metadata && metadata.info) {
+                    for (const [key, value] of Object.entries(metadata.info)) {
+                        if (value !== undefined && value !== null && value !== '') {
+                            html += `
+                                <tr>
+                                    <td class="cell-key">${escapeHtml(key)}</td>
+                                    <td class="cell-val">${escapeHtml(String(value))}</td>
+                                </tr>
+                            `;
+                        }
+                    }
+                }
+
+                html += `
+                            </tbody>
+                        </table>
+                    </div>
+                `;
+
+                html += `
+                    <div class="sub-header">Document Preview</div>
+                    <div class="pdf-controls">
+                        <button id="pdf-prev-btn">Previous</button>
+                        <button id="pdf-next-btn">Next</button>
+                        <span class="pdf-page-indicator" id="pdf-page-indicator">Page 1 / ${pdfDoc.numPages}</span>
+                    </div>
+                    <canvas id="pdf-preview-canvas"></canvas>
+                `;
+
+                setTimeout(async () => {
+                    let currentPageNum = 1;
+                    const canvas = document.getElementById('pdf-preview-canvas');
+                    const pageIndicator = document.getElementById('pdf-page-indicator');
+                    const prevBtn = document.getElementById('pdf-prev-btn');
+                    const nextBtn = document.getElementById('pdf-next-btn');
+                    const extractTxtBtn = document.getElementById('pdf-extract-txt-btn');
+
+                    if (extractTxtBtn) {
+                        extractTxtBtn.addEventListener('click', async () => {
+                            extractTxtBtn.disabled = true;
+                            extractTxtBtn.textContent = 'Extracting...';
+                            let fullDocText = '';
+                            for (let p = 1; p <= pdfDoc.numPages; p++) {
+                                const page = await pdfDoc.getPage(p);
+                                const textContent = await page.getTextContent();
+                                const pageStr = textContent.items.map(it => it.str).join(' ');
+                                fullDocText += `--- Page ${p} ---\n${pageStr}\n\n`;
+                            }
+                            triggerDownload(new Blob([fullDocText], { type: 'text/plain' }), file.name.replace(/\.pdf$/, '.txt'));
+                            extractTxtBtn.disabled = false;
+                            extractTxtBtn.textContent = 'Export All Text (.txt)';
+                        });
+                    }
+
+                    async function renderPage(num) {
+                        if (!canvas) return;
+                        const page = await pdfDoc.getPage(num);
+                        const viewport = page.getViewport({ scale: 1.25 });
+                        canvas.width = viewport.width;
+                        canvas.height = viewport.height;
+                        const ctx = canvas.getContext('2d');
+                        await page.render({ canvasContext: ctx, viewport: viewport }).promise;
+                        if (pageIndicator) pageIndicator.textContent = `Page ${num} / ${pdfDoc.numPages}`;
+                    }
+
+                    if (prevBtn && nextBtn) {
+                        prevBtn.addEventListener('click', () => {
+                            if (currentPageNum > 1) {
+                                currentPageNum--;
+                                renderPage(currentPageNum);
+                            }
+                        });
+                        nextBtn.addEventListener('click', () => {
+                            if (currentPageNum < pdfDoc.numPages) {
+                                currentPageNum++;
+                                renderPage(currentPageNum);
+                            }
+                        });
+                    }
+
+                    renderPage(1);
+                }, 0);
+
+            } catch (err) {
+                html += `<div class="error-state">Failed to render PDF: ${escapeHtml(err.message)}</div>`;
+            }
+
+            if (isEditMode) {
+                html += `
+                    <div class="divider"></div>
+                    <div class="section-header-row">
+                        <div class="section-header">Binary Byte Editor</div>
+                    </div>
+                    ${await renderHexEditor(file)}
+                `;
+            }
+
+            html += `</div>`;
+            return html;
+        }
+
+        async function handleAudio(file) {
+            const objectUrl = URL.createObjectURL(file);
+            const audio = new Audio();
+            audio.preload = 'metadata';
+            audio.src = objectUrl;
+
+            await new Promise((resolve) => {
+                audio.onloadedmetadata = resolve;
+                audio.onerror = resolve;
+            });
+
+            let audioTags = {};
+            try {
+                const headerBytes = new Uint8Array(await file.slice(0, 1024).arrayBuffer());
+                if (headerBytes[0] === 0x49 && headerBytes[1] === 0x44 && headerBytes[2] === 0x33) {
+                    audioTags['Format'] = 'ID3v2 Container Present';
+                }
+            } catch (e) { }
+
+            setTimeout(async () => {
+                try {
+                    const canvas = document.getElementById('audio-waveform-canvas');
+                    if (!canvas) return;
+                    const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+                    const arrayBuf = await file.arrayBuffer();
+                    const audioBuf = await audioCtx.decodeAudioData(arrayBuf);
+                    const rawData = audioBuf.getChannelData(0);
+
+                    const ctx = canvas.getContext('2d');
+                    ctx.clearRect(0, 0, canvas.width, canvas.height);
+                    const step = Math.ceil(rawData.length / canvas.width);
+                    const amp = canvas.height / 2;
+
+                    ctx.fillStyle = '#4f75ff';
+                    for (let i = 0; i < canvas.width; i++) {
+                        let min = 1.0;
+                        let max = -1.0;
+                        for (let j = 0; j < step; j++) {
+                            const datum = rawData[(i * step) + j];
+                            if (datum < min) min = datum;
+                            if (datum > max) max = datum;
+                        }
+                        ctx.fillRect(i, (1 + min) * amp, 1, Math.max(1, (max - min) * amp));
+                    }
+                } catch (e) { }
+            }, 0);
+
+            let html = `
+                <div class="section-block">
+                    <div class="section-header-row">
+                        <div class="section-header">Audio Information & Waveform</div>
+                    </div>
+                    <div class="table-wrap">
+                        <table>
+                            <tbody>
+                                <tr>
+                                    <td class="cell-key">Duration</td>
+                                    <td class="cell-val">${escapeHtml(formatDuration(audio.duration))}</td>
+                                </tr>
+                                <tr>
+                                    <td class="cell-key">Type</td>
+                                    <td class="cell-val">${escapeHtml(file.type || 'Unknown')}</td>
+                                </tr>
+                                <tr>
+                                    <td class="cell-key">Tag Inspection</td>
+                                    <td class="cell-val">${escapeHtml(audioTags['Format'] || 'Standard Audio Stream')}</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="sub-header">Waveform Visualization</div>
+                    <canvas id="audio-waveform-canvas" class="dark-canvas" width="600" height="70"></canvas>
+                    <div class="sub-header">Playback</div>
+                    <audio controls src="${objectUrl}"></audio>
+            `;
+
+            if (isEditMode) {
+                html += `
+                    <div class="divider"></div>
+                    <div class="section-header-row">
+                        <div class="section-header">Binary Byte Editor</div>
+                    </div>
+                    ${await renderHexEditor(file)}
+                `;
+            }
+
+            html += `</div>`;
+            return html;
+        }
+
+        async function handleVideo(file) {
+            const objectUrl = URL.createObjectURL(file);
+            const video = document.createElement('video');
+            video.preload = 'metadata';
+            video.src = objectUrl;
+
+            await new Promise((resolve) => {
+                video.onloadedmetadata = resolve;
+                video.onerror = resolve;
+            });
+
+            setTimeout(() => {
+                const snapBtn = document.getElementById('video-snapshot-btn');
+                const vid = document.getElementById('main-video-player');
+                if (snapBtn && vid) {
+                    snapBtn.addEventListener('click', () => {
+                        const canvas = document.createElement('canvas');
+                        canvas.width = vid.videoWidth || 640;
+                        canvas.height = vid.videoHeight || 360;
+                        const ctx = canvas.getContext('2d');
+                        ctx.drawImage(vid, 0, 0, canvas.width, canvas.height);
+                        canvas.toBlob((blob) => {
+                            if (blob) {
+                                triggerDownload(blob, `snapshot_${Math.floor(vid.currentTime)}s.png`);
+                            }
+                        }, 'image/png');
+                    });
+                }
+            }, 0);
+
+            let html = `
+                <div class="section-block">
+                    <div class="section-header-row">
+                        <div class="section-header">Video Information & Tools</div>
+                        <div>
+                            <button id="video-snapshot-btn" class="btn-success">Capture Frame Snapshot</button>
+                        </div>
+                    </div>
+                    <div class="table-wrap">
+                        <table>
+                            <tbody>
+                                <tr>
+                                    <td class="cell-key">Duration</td>
+                                    <td class="cell-val">${escapeHtml(formatDuration(video.duration))}</td>
+                                </tr>
+                                <tr>
+                                    <td class="cell-key">Resolution</td>
+                                    <td class="cell-val">${video.videoWidth} × ${video.videoHeight}</td>
+                                </tr>
+                                <tr>
+                                    <td class="cell-key">Type</td>
+                                    <td class="cell-val">${escapeHtml(file.type || 'Unknown')}</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="sub-header">Playback</div>
+                    <video id="main-video-player" controls src="${objectUrl}"></video>
+            `;
+
+            if (isEditMode) {
+                html += `
+                    <div class="divider"></div>
+                    <div class="section-header-row">
+                        <div class="section-header">Binary Byte Editor</div>
+                    </div>
+                    ${await renderHexEditor(file)}
+                `;
+            }
+
+            html += `</div>`;
+            return html;
+        }
+
+        async function handleHtml(file) {
+            const fullText = await file.text();
+            activeEditorData = { type: 'text', content: fullText };
+
+            let html = `
+                <div class="section-block">
+                    <div class="section-header-row">
+                        <div class="section-header">HTML Document</div>
+                    </div>
+                    <div class="table-wrap">
+                        <table>
+                            <tbody>
+                                <tr>
+                                    <td class="cell-key">Characters</td>
+                                    <td class="cell-val" id="html-char-count">${fullText.length.toLocaleString()}</td>
+                                </tr>
+                                <tr>
+                                    <td class="cell-key">Lines</td>
+                                    <td class="cell-val" id="html-line-count">${fullText.split(/\r\n|\r|\n/).length.toLocaleString()}</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="sub-header">Live Web Preview</div>
+                    <iframe id="html-live-frame" sandbox="allow-scripts allow-same-origin"></iframe>
+            `;
+
+            if (isEditMode) {
+                html += `
+                    <div class="sub-header">HTML Source Editor</div>
+                    <textarea id="text-editor-input" class="editor-textarea" spellcheck="false">${escapeHtml(fullText)}</textarea>
+                `;
+
+                setTimeout(() => {
+                    const textarea = document.getElementById('text-editor-input');
+                    const iframe = document.getElementById('html-live-frame');
+                    const charCount = document.getElementById('html-char-count');
+                    const lineCount = document.getElementById('html-line-count');
+
+                    function updatePreview() {
+                        const val = textarea.value;
+                        activeEditorData.content = val;
+                        iframe.srcdoc = val;
+                        if (charCount) charCount.textContent = val.length.toLocaleString();
+                        if (lineCount) lineCount.textContent = val.split(/\r\n|\r|\n/).length.toLocaleString();
+                    }
+
+                    if (textarea && iframe) {
+                        iframe.srcdoc = fullText;
+                        textarea.addEventListener('input', updatePreview);
+                    }
+                }, 0);
+            } else {
+                const maxChars = 200000;
+                const isTruncated = fullText.length > maxChars;
+                const displayText = isTruncated ? fullText.substring(0, maxChars) : fullText;
+
+                html += `
+                    <div class="sub-header">Source Code${isTruncated ? ' (Truncated)' : ''}</div>
+                    <pre>${escapeHtml(displayText)}</pre>
+                `;
+
+                setTimeout(() => {
+                    const iframe = document.getElementById('html-live-frame');
+                    if (iframe) iframe.srcdoc = fullText;
+                }, 0);
+            }
+
+            html += `</div>`;
+            return html;
+        }
+
+        async function handleMarkdown(file) {
+            const fullText = await file.text();
+            activeEditorData = { type: 'text', content: fullText };
+
+            let html = `
+                <div class="section-block">
+                    <div class="section-header-row">
+                        <div class="section-header">Markdown Document</div>
+                        <div>
+                            <button id="md-export-html-btn">Export as HTML</button>
+                        </div>
+                    </div>
+                    <div class="table-wrap">
+                        <table>
+                            <tbody>
+                                <tr>
+                                    <td class="cell-key">Characters</td>
+                                    <td class="cell-val" id="md-char-count">${fullText.length.toLocaleString()}</td>
+                                </tr>
+                                <tr>
+                                    <td class="cell-key">Lines</td>
+                                    <td class="cell-val" id="md-line-count">${fullText.split(/\r\n|\r|\n/).length.toLocaleString()}</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="sub-header">Rendered Markdown Preview</div>
+                    <div id="md-live-preview" class="markdown-preview">${marked.parse(fullText)}</div>
+            `;
+
+            setTimeout(() => {
+                const exportBtn = document.getElementById('md-export-html-btn');
+                if (exportBtn) {
+                    exportBtn.addEventListener('click', () => {
+                        const rendered = marked.parse(activeEditorData.content || fullText);
+                        const doc = `<!DOCTYPE html><html><head><meta charset="utf-8"><title>${escapeHtml(file.name)}</title></head><body>${rendered}</body></html>`;
+                        triggerDownload(new Blob([doc], { type: 'text/html' }), file.name.replace(/\.md$/, '.html'));
+                    });
+                }
+            }, 0);
+
+            if (isEditMode) {
+                html += `
+                    <div class="sub-header">Markdown Source Editor</div>
+                    <textarea id="text-editor-input" class="editor-textarea" spellcheck="false">${escapeHtml(fullText)}</textarea>
+                `;
+
+                setTimeout(() => {
+                    const textarea = document.getElementById('text-editor-input');
+                    const preview = document.getElementById('md-live-preview');
+                    const charCount = document.getElementById('md-char-count');
+                    const lineCount = document.getElementById('md-line-count');
+
+                    if (textarea && preview) {
+                        textarea.addEventListener('input', () => {
+                            const val = textarea.value;
+                            activeEditorData.content = val;
+                            preview.innerHTML = marked.parse(val);
+                            if (charCount) charCount.textContent = val.length.toLocaleString();
+                            if (lineCount) lineCount.textContent = val.split(/\r\n|\r|\n/).length.toLocaleString();
+                        });
+                    }
+                }, 0);
+            } else {
+                const maxChars = 200000;
+                const isTruncated = fullText.length > maxChars;
+                const displayText = isTruncated ? fullText.substring(0, maxChars) : fullText;
+
+                html += `
+                    <div class="sub-header">Raw Markdown${isTruncated ? ' (Truncated)' : ''}</div>
+                    <pre>${escapeHtml(displayText)}</pre>
+                `;
+            }
+
+            html += `</div>`;
+            return html;
+        }
+
+        async function handleDelimitedTable(file, ext) {
+            const fullText = await file.text();
+            activeEditorData = { type: 'text', content: fullText };
+            const delimiter = ext === 'tsv' ? '\t' : ',';
+
+            const rawLines = fullText.split(/\r\n|\r|\n/).filter(line => line.trim().length > 0);
+            const totalRows = rawLines.length;
+            const displayLimit = Math.min(totalRows, 100);
+
+            let tableHtml = '';
+            if (totalRows > 0) {
+                const headerCols = rawLines[0].split(delimiter);
+                tableHtml += '<thead><tr>' + headerCols.map(c => `<th>${escapeHtml(c.trim())}</th>`).join('') + '</tr></thead><tbody>';
+
+                for (let i = 1; i < displayLimit; i++) {
+                    const rowCols = rawLines[i].split(delimiter);
+                    tableHtml += '<tr>' + rowCols.map(c => `<td>${escapeHtml(c.trim())}</td>`).join('') + '</tr>';
+                }
+                tableHtml += '</tbody>';
+            }
+
+            setTimeout(() => {
+                const convertJsonBtn = document.getElementById('table-to-json-btn');
+                if (convertJsonBtn && totalRows > 0) {
+                    convertJsonBtn.addEventListener('click', () => {
+                        const headers = rawLines[0].split(delimiter).map(h => h.trim());
+                        const records = [];
+                        // We naively split on delimiters here. If someone's cell contains a comma inside quotes,
+                        // godspeed to them, because building an RFC 4180 parser in 10 lines is a fool's errand.
+                        for (let i = 1; i < rawLines.length; i++) {
+                            const cols = rawLines[i].split(delimiter);
+                            const obj = {};
+                            headers.forEach((h, idx) => {
+                                obj[h] = cols[idx] ? cols[idx].trim() : '';
+                            });
+                            records.push(obj);
+                        }
+                        const jsonStr = JSON.stringify(records, null, 2);
+                        triggerDownload(new Blob([jsonStr], { type: 'application/json' }), file.name.replace(/\.[^/.]+$/, '.json'));
+                    });
+                }
+            }, 0);
+
+            let html = `
+                <div class="section-block">
+                    <div class="section-header-row">
+                        <div class="section-header">Tabular Data (${ext.toUpperCase()})</div>
+                        <div>
+                            <button id="table-to-json-btn">Convert to JSON</button>
+                        </div>
+                    </div>
+                    <div class="table-wrap">
+                        <table>
+                            <tbody>
+                                <tr>
+                                    <td class="cell-key">Total Rows</td>
+                                    <td class="cell-val">${totalRows.toLocaleString()}</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="sub-header">Rendered Table (${displayLimit} rows shown)</div>
+                    <div class="table-wrap">
+                        <table>${tableHtml}</table>
+                    </div>
+            `;
+
+            if (isEditMode) {
+                html += `
+                    <div class="sub-header">Raw Source Editor</div>
+                    <textarea id="text-editor-input" class="editor-textarea" spellcheck="false">${escapeHtml(fullText)}</textarea>
+                `;
+                setTimeout(() => {
+                    const textarea = document.getElementById('text-editor-input');
+                    if (textarea) {
+                        textarea.addEventListener('input', () => {
+                            activeEditorData.content = textarea.value;
+                        });
+                    }
+                }, 0);
+            }
+
+            html += `</div>`;
+            return html;
+        }
+
+        async function handleJson(file) {
+            const fullText = await file.text();
+            activeEditorData = { type: 'text', content: fullText };
+
+            let formattedJson = '';
+            let parseError = null;
+
+            try {
+                const parsed = JSON.parse(fullText);
+                formattedJson = JSON.stringify(parsed, null, 2);
+            } catch (err) {
+                parseError = err.message;
+                formattedJson = fullText;
+            }
+
+            setTimeout(() => {
+                const convertCsvBtn = document.getElementById('json-to-csv-btn');
+                if (convertCsvBtn) {
+                    convertCsvBtn.addEventListener('click', () => {
+                        try {
+                            const data = JSON.parse(activeEditorData.content || fullText);
+                            if (Array.isArray(data) && data.length > 0) {
+                                const keys = Object.keys(data[0]);
+                                let csv = keys.join(',') + '\n';
+                                for (const row of data) {
+                                    csv += keys.map(k => JSON.stringify(row[k] ?? '')).join(',') + '\n';
+                                }
+                                triggerDownload(new Blob([csv], { type: 'text/csv' }), file.name.replace(/\.json$/, '.csv'));
+                            }
+                        } catch (e) { }
+                    });
+                }
+            }, 0);
+
+            let html = `
+                <div class="section-block">
+                    <div class="section-header-row">
+                        <div class="section-header">JSON Document</div>
+                        <div>
+                            <button id="json-to-csv-btn">Convert Array to CSV</button>
+                        </div>
+                    </div>
+            `;
+
+            if (parseError) {
+                html += `<div class="error-state">Syntax Error: ${escapeHtml(parseError)}</div>`;
+            }
+
+            if (isEditMode) {
+                html += `
+                    <div class="sub-header">JSON Source Editor</div>
+                    <textarea id="text-editor-input" class="editor-textarea" spellcheck="false">${escapeHtml(formattedJson)}</textarea>
+                `;
+                setTimeout(() => {
+                    const textarea = document.getElementById('text-editor-input');
+                    if (textarea) {
+                        textarea.addEventListener('input', () => {
+                            activeEditorData.content = textarea.value;
+                        });
+                    }
+                }, 0);
+            } else {
+                html += `
+                    <div class="sub-header">Formatted View</div>
+                    <pre>${escapeHtml(formattedJson)}</pre>
+                `;
+            }
+
+            html += `</div>`;
+            return html;
+        }
+
+        async function handleText(file) {
+            const fullText = await file.text();
+            activeEditorData = { type: 'text', content: fullText };
+
+            let html = `
+                <div class="section-block">
+                    <div class="section-header-row">
+                        <div class="section-header">Text Content</div>
+                    </div>
+                    <div class="table-wrap">
+                        <table>
+                            <tbody>
+                                <tr>
+                                    <td class="cell-key">Characters</td>
+                                    <td class="cell-val" id="text-char-count">${fullText.length.toLocaleString()}</td>
+                                </tr>
+                                <tr>
+                                    <td class="cell-key">Lines</td>
+                                    <td class="cell-val" id="text-line-count">${fullText.split(/\r\n|\r|\n/).length.toLocaleString()}</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+            `;
+
+            if (isEditMode) {
+                html += `
+                    <div class="sub-header">Text Editor</div>
+                    <textarea id="text-editor-input" class="editor-textarea" spellcheck="false">${escapeHtml(fullText)}</textarea>
+                `;
+
+                setTimeout(() => {
+                    const textarea = document.getElementById('text-editor-input');
+                    const charCount = document.getElementById('text-char-count');
+                    const lineCount = document.getElementById('text-line-count');
+
+                    if (textarea) {
+                        textarea.addEventListener('input', () => {
+                            const val = textarea.value;
+                            activeEditorData.content = val;
+                            if (charCount) charCount.textContent = val.length.toLocaleString();
+                            if (lineCount) lineCount.textContent = val.split(/\r\n|\r|\n/).length.toLocaleString();
+                        });
+                    }
+                }, 0);
+            } else {
+                const maxChars = 200000;
+                const isTruncated = fullText.length > maxChars;
+                const displayText = isTruncated ? fullText.substring(0, maxChars) : fullText;
+
+                html += `
+                    <div class="sub-header">Preview${isTruncated ? ' (Truncated)' : ''}</div>
+                    <pre>${escapeHtml(displayText)}</pre>
+                `;
+            }
+
+            html += `</div>`;
+            return html;
+        }
+
+        async function handleBinary(file) {
+            if (isEditMode) {
+                return `
+                    <div class="section-block">
+                        <div class="section-header-row">
+                            <div class="section-header">Binary & Hex Editor</div>
+                        </div>
+                        ${await renderHexEditor(file)}
+                    </div>
+                `;
+            }
+
+            const initialBytes = 512;
+            const slice = file.slice(0, initialBytes);
+            const buffer = await slice.arrayBuffer();
+            const hexText = generateHexDump(buffer, 0);
+
+            let html = `
+                <div class="section-block">
+                    <div class="section-header-row">
+                        <div class="section-header">Binary Inspection & Search</div>
+                    </div>
+                    <div class="btn-row">
+                        <input type="text" id="hex-search-input" placeholder="Search text or hex pattern...">
+                        <button id="hex-search-btn">Find</button>
+                        <button id="extract-strings-btn">Extract Printable Strings</button>
+                        <button id="preview-text-btn">Decode as UTF-8</button>
+                    </div>
+                    <div id="binary-subview-container"></div>
+                    <div class="sub-header">Hex Dump (<span id="hex-count">${Math.min(file.size, initialBytes)}</span> / ${file.size.toLocaleString()} bytes)</div>
+                    <pre id="hex-output">${escapeHtml(hexText)}</pre>
+            `;
+
+            if (file.size > initialBytes) {
+                html += `
+                    <div class="btn-row" id="hex-controls">
+                        <button id="see-more-hex-btn">Next 4 KB</button>
+                        <button id="load-all-hex-btn">Load All</button>
+                    </div>
+                `;
+            }
+
+            html += `</div>`;
+
+            setTimeout(() => {
+                const previewTextBtn = document.getElementById('preview-text-btn');
+                const stringsBtn = document.getElementById('extract-strings-btn');
+                const searchBtn = document.getElementById('hex-search-btn');
+                const searchInput = document.getElementById('hex-search-input');
+                const subviewContainer = document.getElementById('binary-subview-container');
+                const hexOutput = document.getElementById('hex-output');
+
+                if (searchBtn && searchInput && hexOutput) {
+                    searchBtn.addEventListener('click', () => {
+                        const query = searchInput.value.trim();
+                        if (!query) return;
+                        const original = hexOutput.textContent;
+                        const escapedQuery = query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+                        const regex = new RegExp(`(${escapedQuery})`, 'gi');
+                        hexOutput.innerHTML = escapeHtml(original).replace(regex, '<mark class="search-highlight">$1</mark>');
+                    });
+                }
+
+                if (stringsBtn && subviewContainer) {
+                    stringsBtn.addEventListener('click', async () => {
+                        stringsBtn.disabled = true;
+                        subviewContainer.innerHTML = '<div class="empty-state">Extracting strings...</div>';
+
+                        try {
+                            // Capped at 1 MB because extracting strings across an entire 2 GB ISO
+                            // is an efficient way to turn your browser tab into a miniature space heater.
+                            const scanLimit = Math.min(file.size, 1024 * 1024);
+                            const sliceBuffer = await file.slice(0, scanLimit).arrayBuffer();
+                            const bytes = new Uint8Array(sliceBuffer);
+
+                            let strings = [];
+                            let current = '';
+
+                            for (let i = 0; i < bytes.length; i++) {
+                                const b = bytes[i];
+                                if (b >= 32 && b <= 126) {
+                                    current += String.fromCharCode(b);
+                                } else {
+                                    if (current.length >= 4) {
+                                        strings.push(current);
+                                    }
+                                    current = '';
+                                }
+                            }
+                            if (current.length >= 4) strings.push(current);
+
+                            subviewContainer.innerHTML = `
+                                <div class="sub-header">Printable Strings (Minimum 4 characters, scanned up to 1 MB)</div>
+                                <pre style="max-height: 240px;">${escapeHtml(strings.slice(0, 500).join('\n'))}</pre>
+                            `;
+                        } catch (err) {
+                            subviewContainer.innerHTML = `<div class="error-state">Extraction failed: ${escapeHtml(err.message)}</div>`;
+                        } finally {
+                            stringsBtn.disabled = false;
+                        }
+                    });
+                }
+
+                if (previewTextBtn && subviewContainer) {
+                    previewTextBtn.addEventListener('click', async () => {
+                        previewTextBtn.disabled = true;
+                        subviewContainer.innerHTML = '<div class="empty-state">Decoding...</div>';
+
+                        try {
+                            const maxChars = 200000;
+                            const fullText = await file.text();
+                            const isTruncated = fullText.length > maxChars;
+                            const displayText = isTruncated ? fullText.substring(0, maxChars) : fullText;
+
+                            subviewContainer.innerHTML = `
+                                <div class="sub-header">Decoded Text${isTruncated ? ' (Truncated)' : ''}</div>
+                                <pre>${escapeHtml(displayText)}</pre>
+                            `;
+                        } catch (err) {
+                            subviewContainer.innerHTML = `<div class="error-state">Failed to decode: ${escapeHtml(err.message)}</div>`;
+                        } finally {
+                            previewTextBtn.disabled = false;
+                        }
+                    });
+                }
+
+                if (file.size > initialBytes) {
+                    let currentOffset = initialBytes;
+                    const seeMoreBtn = document.getElementById('see-more-hex-btn');
+                    const loadAllBtn = document.getElementById('load-all-hex-btn');
+                    const hexCount = document.getElementById('hex-count');
+                    const hexControls = document.getElementById('hex-controls');
+
+                    if (seeMoreBtn) {
+                        seeMoreBtn.addEventListener('click', async () => {
+                            seeMoreBtn.disabled = true;
+                            const chunkSize = 4096;
+                            const nextOffset = Math.min(file.size, currentOffset + chunkSize);
+                            const chunkSlice = file.slice(currentOffset, nextOffset);
+                            const chunkBuffer = await chunkSlice.arrayBuffer();
+                            const newDump = generateHexDump(chunkBuffer, currentOffset);
+                            hexOutput.textContent += '\n' + newDump;
+                            currentOffset = nextOffset;
+                            hexCount.textContent = currentOffset;
+                            seeMoreBtn.disabled = false;
+
+                            if (currentOffset >= file.size && hexControls) {
+                                hexControls.innerHTML = '<div class="empty-state">Complete binary dump loaded</div>';
+                            }
+                        });
+                    }
+
+                    if (loadAllBtn) {
+                        loadAllBtn.addEventListener('click', async () => {
+                            loadAllBtn.disabled = true;
+                            if (seeMoreBtn) seeMoreBtn.disabled = true;
+                            loadAllBtn.textContent = 'Loading...';
+
+                            const fullSlice = file.slice(currentOffset);
+                            const fullBuffer = await fullSlice.arrayBuffer();
+                            const fullDump = generateHexDump(fullBuffer, currentOffset);
+                            hexOutput.textContent += '\n' + fullDump;
+                            currentOffset = file.size;
+                            hexCount.textContent = file.size.toLocaleString();
+
+                            if (hexControls) {
+                                hexControls.innerHTML = '<div class="empty-state">Complete binary dump loaded</div>';
+                            }
+                        });
+                    }
+                }
+            }, 0);
+
+            return html;
+        }
+
+        async function renderHexEditor(file) {
+            const buffer = await file.arrayBuffer();
+            const bytes = new Uint8Array(buffer);
+            activeEditorData = { type: 'binary', bytes: bytes };
+
+            // We cap interactive DOM inputs at 1,024 bytes. Rendering 50,000 editable input elements
+            // into the DOM will bring Chromium to its knees faster than an infinite while loop.
+            const displayLimit = Math.min(bytes.length, 1024);
+
+            let tableRows = '';
+            for (let i = 0; i < displayLimit; i += 16) {
+                const offset = i.toString(16).padStart(8, '0');
+                let inputsHtml = '';
+                let asciiRow = '';
+
+                for (let j = 0; j < 16; j++) {
+                    const idx = i + j;
+                    if (idx < displayLimit) {
+                        const b = bytes[idx];
+                        const hexVal = b.toString(16).padStart(2, '0').toUpperCase();
+                        inputsHtml += `<input type="text" maxlength="2" class="hex-byte-input" data-index="${idx}" value="${hexVal}">`;
+                        asciiRow += (b >= 32 && b <= 126) ? String.fromCharCode(b) : '.';
+                    } else {
+                        inputsHtml += `<span style="display:inline-block;width:24px;"></span>`;
+                    }
+                }
+
+                tableRows += `
+                    <tr>
+                        <td class="hex-offset-col">${offset}</td>
+                        <td><div class="hex-bytes-col">${inputsHtml}</div></td>
+                        <td class="hex-ascii-col" id="hex-ascii-row-${i}">${escapeHtml(asciiRow)}</td>
+                    </tr>
+                `;
+            }
+
+            setTimeout(() => {
+                const inputs = document.querySelectorAll('.hex-byte-input');
+                inputs.forEach(input => {
+                    input.addEventListener('change', (e) => {
+                        const idx = parseInt(e.target.dataset.index, 10);
+                        let val = e.target.value.trim();
+                        let parsed = parseInt(val, 16);
+
+                        if (isNaN(parsed) || parsed < 0 || parsed > 255) {
+                            parsed = bytes[idx];
+                        }
+
+                        bytes[idx] = parsed;
+                        e.target.value = parsed.toString(16).padStart(2, '0').toUpperCase();
+
+                        const rowStart = Math.floor(idx / 16) * 16;
+                        const asciiElem = document.getElementById(`hex-ascii-row-${rowStart}`);
+                        if (asciiElem) {
+                            let newAscii = '';
+                            for (let k = 0; k < 16; k++) {
+                                const currIdx = rowStart + k;
+                                if (currIdx < displayLimit) {
+                                    const currB = bytes[currIdx];
+                                    newAscii += (currB >= 32 && currB <= 126) ? String.fromCharCode(currB) : '.';
+                                }
+                            }
+                            asciiElem.textContent = newAscii;
+                        }
+                    });
+
+                    input.addEventListener('keydown', (e) => {
+                        if (e.key === 'ArrowRight' && input.selectionStart === input.value.length) {
+                            const next = input.nextElementSibling || input.closest('tr')?.nextElementSibling?.querySelector('.hex-byte-input');
+                            if (next) { next.focus(); next.select(); }
+                        } else if (e.key === 'ArrowLeft' && input.selectionStart === 0) {
+                            const prev = input.previousElementSibling || input.closest('tr')?.previousElementSibling?.querySelectorAll('.hex-byte-input');
+                            if (prev) {
+                                const target = prev.length ? prev[prev.length - 1] : prev;
+                                target.focus(); target.select();
+                            }
+                        }
+                    });
+                });
+            }, 0);
+
+            return `
+                <div class="sub-header">Interactive Hex Byte Editor (${displayLimit.toLocaleString()} of ${bytes.length.toLocaleString()} bytes loaded)</div>
+                <div class="table-wrap">
+                    <table class="hex-editor-table">
+                        <thead>
+                            <tr>
+                                <th>Offset</th>
+                                <th>Bytes (Hex)</th>
+                                <th>ASCII</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${tableRows}
+                        </tbody>
+                    </table>
+                </div>
+            `;
+        }
+
+        function generateHexDump(buffer, startOffset) {
+            const bytes = new Uint8Array(buffer);
+            let hexRows = [];
+
+            for (let i = 0; i < bytes.length; i += 16) {
+                const offset = (startOffset + i).toString(16).padStart(8, '0');
+                let hexParts = [];
+                let asciiParts = [];
+
+                for (let j = 0; j < 16; j++) {
+                    if (i + j < bytes.length) {
+                        const b = bytes[i + j];
+                        hexParts.push(b.toString(16).padStart(2, '0'));
+                        asciiParts.push(b >= 32 && b <= 126 ? String.fromCharCode(b) : '.');
+                    } else {
+                        hexParts.push('  ');
+                        asciiParts.push(' ');
+                    }
+                }
+
+                hexRows.push(
+                    `${offset}  ${hexParts.slice(0, 8).join(' ')}  ${hexParts.slice(8).join(' ')}  |${asciiParts.join('')}|`
+                );
+            }
+
+            return hexRows.join('\n');
+        }
+
+        function escapeHtml(str) {
+            return String(str)
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#039;');
+        }
+    </script>
+</body>
+
+</html>
