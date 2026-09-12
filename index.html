@@ -1,9 +1,9 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
     <title>FilePeek</title>
     <script src="https://cdn.jsdelivr.net/npm/exifreader@4.44.1/dist/exif-reader.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
@@ -13,35 +13,16 @@
         pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
     </script>
     <style>
-        :root {
-            --bg: #090a0f;
-            --surface: #11131a;
-            --surface-subtle: #171a24;
-            --surface-hover: #1d212e;
-            --border: #232736;
-            --border-focus: #3b4259;
-            --text-primary: #e6e8ee;
-            --text-secondary: #8b92a5;
-            --text-tertiary: #585f73;
-            --accent: #4f75ff;
-            --accent-soft: rgba(79, 117, 255, 0.12);
-            --danger: #e5484d;
-            --success: #30a46c;
-            --code-bg: #0c0d12;
-            --mono: "JetBrains Mono", "SFMono-Regular", Consolas, Menlo, monospace;
-            --sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-        }
-
         * {
             box-sizing: border-box;
-            margin: 0;
-            padding: 0;
+            margin: 0px;
+            padding: 0px;
         }
 
         body {
-            background: var(--bg);
-            color: var(--text-primary);
-            font-family: var(--sans);
+            background: #090a0f;
+            color: #e6e8ee;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
             font-size: 14px;
             line-height: 1.5;
             padding: 40px 24px 80px;
@@ -50,10 +31,10 @@
 
         .container {
             max-width: 960px;
-            margin: 0 auto;
+            margin: 0px auto;
         }
 
-        header {
+        .topbanner {
             margin-bottom: 28px;
         }
 
@@ -61,18 +42,18 @@
             font-size: 24px;
             font-weight: 600;
             letter-spacing: -0.02em;
-            color: var(--text-primary);
+            color: #e6e8ee;
             margin-bottom: 4px;
         }
 
         .subtitle {
             font-size: 13px;
-            color: var(--text-secondary);
+            color: #8b92a5;
         }
 
         #dropZone {
-            background: var(--surface);
-            border: 1px dashed var(--border);
+            background: #11131a;
+            border: 1px dashed #232736;
             border-radius: 6px;
             padding: 48px 24px;
             text-align: center;
@@ -82,25 +63,25 @@
         }
 
         #dropZone:hover {
-            border-color: var(--border-focus);
-            background: var(--surface-subtle);
+            border-color: #3b4259;
+            background: #171a24;
         }
 
         #dropZone.dragging {
-            border-color: var(--accent);
-            background: var(--accent-soft);
+            border-color: #4f75ff;
+            background: rgba(79,117,255,0.12);
         }
 
-        #dropZone .drop-title {
+        #dropZone .droptitle {
             font-size: 14px;
             font-weight: 500;
-            color: var(--text-primary);
+            color: #e6e8ee;
             margin-bottom: 4px;
         }
 
-        #dropZone .drop-sub {
+        #dropZone .dropsub {
             font-size: 12px;
-            color: var(--text-tertiary);
+            color: #585f73;
         }
 
         #fileInput {
@@ -111,11 +92,11 @@
             margin-top: 32px;
         }
 
-        .section-block {
+        .sectionblock {
             margin-bottom: 28px;
         }
 
-        .section-header-row {
+        .sectionheaderrow {
             display: flex;
             align-items: center;
             justify-content: space-between;
@@ -124,26 +105,26 @@
             gap: 8px;
         }
 
-        .section-header {
+        .sectionheader {
             font-size: 12px;
             font-weight: 600;
             text-transform: uppercase;
             letter-spacing: 0.06em;
-            color: var(--text-secondary);
+            color: #8b92a5;
         }
 
-        .sub-header {
+        .subheader {
             font-size: 12px;
             font-weight: 600;
-            color: var(--text-secondary);
+            color: #8b92a5;
             margin: 16px 0 8px;
         }
 
-        .table-wrap {
-            border: 1px solid var(--border);
+        .tablewrap {
+            border: 1px solid #232736;
             border-radius: 6px;
             overflow-x: auto;
-            background: var(--surface);
+            background: #11131a;
         }
 
         table {
@@ -156,13 +137,13 @@
         th,
         td {
             padding: 9px 14px;
-            border-bottom: 1px solid var(--border);
+            border-bottom: 1px solid #232736;
             vertical-align: top;
         }
 
         th {
-            background: var(--surface-subtle);
-            color: var(--text-secondary);
+            background: #171a24;
+            color: #8b92a5;
             font-weight: 500;
             font-size: 11px;
             text-transform: uppercase;
@@ -173,21 +154,21 @@
             border-bottom: none;
         }
 
-        td.cell-key {
+        td.cellkey {
             width: 28%;
-            color: var(--text-secondary);
-            font-family: var(--mono);
+            color: #8b92a5;
+            font-family: 'JetBrains Mono', SFMono-Regular, Consolas, Menlo, monospace;
             font-size: 12px;
             white-space: nowrap;
         }
 
-        td.cell-val {
-            color: var(--text-primary);
+        td.cellval {
+            color: #e6e8ee;
             word-break: break-word;
         }
 
-        td.cell-mono {
-            font-family: var(--mono);
+        td.cellmono {
+            font-family: 'JetBrains Mono', SFMono-Regular, Consolas, Menlo, monospace;
             font-size: 12px;
             word-break: break-all;
         }
@@ -196,9 +177,9 @@
             display: block;
             max-width: 100%;
             max-height: 540px;
-            border: 1px solid var(--border);
+            border: 1px solid #232736;
             border-radius: 6px;
-            background: var(--surface);
+            background: #11131a;
             margin-top: 8px;
         }
 
@@ -206,13 +187,13 @@
             display: block;
             max-width: 100%;
             height: auto;
-            border: 1px solid var(--border);
+            border: 1px solid #232736;
             border-radius: 6px;
             background: #ffffff;
             margin-top: 8px;
         }
 
-        canvas.dark-canvas {
+        canvas.darkcanvas {
             background: #090a0f;
         }
 
@@ -229,110 +210,110 @@
             display: block;
             width: 100%;
             height: 480px;
-            border: 1px solid var(--border);
+            border: 1px solid #232736;
             border-radius: 6px;
             background: #ffffff;
             margin-top: 8px;
         }
 
-        .markdown-preview {
-            background: var(--surface);
-            border: 1px solid var(--border);
+        .markdownpreview {
+            background: #11131a;
+            border: 1px solid #232736;
             border-radius: 6px;
             padding: 20px 24px;
             margin-top: 8px;
-            color: var(--text-primary);
+            color: #e6e8ee;
             line-height: 1.65;
             overflow-wrap: break-word;
         }
 
-        .markdown-preview h1,
-        .markdown-preview h2,
-        .markdown-preview h3,
-        .markdown-preview h4 {
-            color: var(--text-primary);
+        .markdownpreview h1,
+        .markdownpreview h2,
+        .markdownpreview h3,
+        .markdownpreview h4 {
+            color: #e6e8ee;
             margin: 20px 0 10px;
             letter-spacing: -0.01em;
         }
 
-        .markdown-preview h1:first-child,
-        .markdown-preview h2:first-child {
-            margin-top: 0;
+        .markdownpreview h1:first-child,
+        .markdownpreview h2:first-child {
+            margin-top: 0px;
         }
 
-        .markdown-preview p,
-        .markdown-preview ul,
-        .markdown-preview ol,
-        .markdown-preview blockquote {
+        .markdownpreview p,
+        .markdownpreview ul,
+        .markdownpreview ol,
+        .markdownpreview blockquote {
             margin-bottom: 14px;
         }
 
-        .markdown-preview ul,
-        .markdown-preview ol {
+        .markdownpreview ul,
+        .markdownpreview ol {
             padding-left: 24px;
         }
 
-        .markdown-preview code {
-            font-family: var(--mono);
+        .markdownpreview code {
+            font-family: 'JetBrains Mono', SFMono-Regular, Consolas, Menlo, monospace;
             font-size: 12px;
-            background: var(--code-bg);
-            border: 1px solid var(--border);
+            background: #0c0d12;
+            border: 1px solid #232736;
             padding: 2px 6px;
             border-radius: 4px;
             color: #d1d5db;
         }
 
-        .markdown-preview pre {
-            margin-top: 0;
+        .markdownpreview pre {
+            margin-top: 0px;
             margin-bottom: 14px;
         }
 
-        .markdown-preview pre code {
+        .markdownpreview pre code {
             border: none;
-            padding: 0;
+            padding: 0px;
             background: transparent;
         }
 
-        .markdown-preview blockquote {
-            border-left: 3px solid var(--accent);
+        .markdownpreview blockquote {
+            border-left: 3px solid #4f75ff;
             padding-left: 14px;
-            color: var(--text-secondary);
+            color: #8b92a5;
         }
 
-        .markdown-preview a {
-            color: var(--accent);
+        .markdownpreview a {
+            color: #4f75ff;
             text-decoration: none;
         }
 
-        .markdown-preview a:hover {
+        .markdownpreview a:hover {
             text-decoration: underline;
         }
 
-        .markdown-preview hr {
+        .markdownpreview hr {
             border: 0;
-            border-top: 1px solid var(--border);
+            border-top: 1px solid #232736;
             margin: 20px 0;
         }
 
         pre {
-            background: var(--code-bg);
+            background: #0c0d12;
             color: #d1d5db;
-            border: 1px solid var(--border);
+            border: 1px solid #232736;
             border-radius: 6px;
             padding: 14px;
-            font-family: var(--mono);
+            font-family: 'JetBrains Mono', SFMono-Regular, Consolas, Menlo, monospace;
             font-size: 12px;
             line-height: 1.55;
             overflow: auto;
             margin-top: 8px;
         }
 
-        #hex-output {
+        #hexoutput {
             white-space: pre;
             overflow-x: auto;
         }
 
-        .btn-row {
+        .btnrow {
             display: flex;
             gap: 8px;
             margin: 10px 0;
@@ -341,9 +322,9 @@
         }
 
         button {
-            background: var(--surface-subtle);
-            border: 1px solid var(--border);
-            color: var(--text-primary);
+            background: #171a24;
+            border: 1px solid #232736;
+            color: #e6e8ee;
             font-family: inherit;
             font-size: 12px;
             font-weight: 500;
@@ -354,12 +335,12 @@
         }
 
         button:hover {
-            background: var(--surface-hover);
-            border-color: var(--border-focus);
+            background: #1d212e;
+            border-color: #3b4259;
         }
 
         button:active {
-            background: var(--surface);
+            background: #11131a;
         }
 
         button:disabled {
@@ -367,28 +348,28 @@
             cursor: not-allowed;
         }
 
-        button.btn-primary {
-            background: var(--accent);
-            border-color: var(--accent);
+        button.btnprimary {
+            background: #4f75ff;
+            border-color: #4f75ff;
             color: #ffffff;
         }
 
-        button.btn-primary:hover {
+        button.btnprimary:hover {
             background: #3d63f0;
             border-color: #3d63f0;
         }
 
-        button.btn-success {
-            background: var(--success);
-            border-color: var(--success);
+        button.btnsuccess {
+            background: #30a46c;
+            border-color: #30a46c;
             color: #ffffff;
         }
 
         input[type="text"],
         select {
-            background: var(--code-bg);
-            border: 1px solid var(--border);
-            color: var(--text-primary);
+            background: #0c0d12;
+            border: 1px solid #232736;
+            color: #e6e8ee;
             padding: 6px 10px;
             border-radius: 4px;
             font-family: inherit;
@@ -398,18 +379,18 @@
 
         input[type="text"]:focus,
         select:focus {
-            border-color: var(--accent);
+            border-color: #4f75ff;
         }
 
-        .editor-textarea {
+        .editortextarea {
             width: 100%;
             height: 340px;
-            background: var(--code-bg);
+            background: #0c0d12;
             color: #d1d5db;
-            border: 1px solid var(--border);
+            border: 1px solid #232736;
             border-radius: 6px;
             padding: 14px;
-            font-family: var(--mono);
+            font-family: 'JetBrains Mono', SFMono-Regular, Consolas, Menlo, monospace;
             font-size: 12px;
             line-height: 1.55;
             resize: vertical;
@@ -418,52 +399,52 @@
             box-sizing: border-box;
         }
 
-        .editor-textarea:focus {
-            border-color: var(--accent);
+        .editortextarea:focus {
+            border-color: #4f75ff;
         }
 
-        .hex-editor-table {
+        .hexeditortable {
             width: 100%;
             border-collapse: collapse;
-            font-family: var(--mono);
+            font-family: 'JetBrains Mono', SFMono-Regular, Consolas, Menlo, monospace;
             font-size: 12px;
         }
 
-        .hex-editor-table th {
-            background: var(--surface-subtle);
-            color: var(--text-secondary);
+        .hexeditortable th {
+            background: #171a24;
+            color: #8b92a5;
             font-weight: 500;
             padding: 6px 10px;
-            border-bottom: 1px solid var(--border);
+            border-bottom: 1px solid #232736;
             text-align: left;
         }
 
-        .hex-editor-table td {
+        .hexeditortable td {
             padding: 4px 6px;
-            border-bottom: 1px solid var(--border);
+            border-bottom: 1px solid #232736;
             vertical-align: middle;
         }
 
-        .hex-offset-col {
-            color: var(--text-tertiary);
+        .hexoffsetcol {
+            color: #585f73;
             width: 80px;
             white-space: nowrap;
             user-select: none;
         }
 
-        .hex-bytes-col {
+        .hexbytescol {
             display: flex;
             gap: 4px;
             flex-wrap: wrap;
         }
 
-        .hex-byte-input {
+        .hexbyteinput {
             width: 24px;
             text-align: center;
-            background: var(--code-bg);
-            border: 1px solid var(--border);
+            background: #0c0d12;
+            border: 1px solid #232736;
             color: #d1d5db;
-            font-family: var(--mono);
+            font-family: 'JetBrains Mono', SFMono-Regular, Consolas, Menlo, monospace;
             font-size: 11px;
             padding: 2px 0;
             border-radius: 2px;
@@ -471,110 +452,110 @@
             text-transform: uppercase;
         }
 
-        .hex-byte-input:focus {
-            border-color: var(--accent);
-            background: var(--surface-hover);
+        .hexbyteinput:focus {
+            border-color: #4f75ff;
+            background: #1d212e;
         }
 
-        .hex-ascii-col {
-            color: var(--text-secondary);
+        .hexasciicol {
+            color: #8b92a5;
             letter-spacing: 0.1em;
             white-space: pre;
             width: 140px;
             user-select: none;
         }
 
-        .empty-state {
+        .emptystate {
             padding: 32px;
             text-align: center;
-            color: var(--text-tertiary);
-            border: 1px solid var(--border);
+            color: #585f73;
+            border: 1px solid #232736;
             border-radius: 6px;
-            background: var(--surface);
+            background: #11131a;
         }
 
-        .error-state {
+        .errorstate {
             padding: 14px;
-            color: var(--danger);
-            border: 1px solid var(--border);
+            color: #e5484d;
+            border: 1px solid #232736;
             border-radius: 6px;
-            background: var(--surface);
+            background: #11131a;
         }
 
         .divider {
             border: 0;
-            border-top: 1px solid var(--border);
+            border-top: 1px solid #232736;
             margin: 24px 0;
         }
 
-        .toolbar {
+        .bar {
             display: flex;
             align-items: center;
             justify-content: space-between;
             padding: 12px 16px;
-            background: var(--surface);
-            border: 1px solid var(--border);
+            background: #11131a;
+            border: 1px solid #232736;
             border-radius: 6px;
             margin-bottom: 24px;
             gap: 12px;
             flex-wrap: wrap;
         }
 
-        .toolbar-info {
+        .bar_info {
             font-size: 13px;
             font-weight: 500;
-            color: var(--text-primary);
+            color: #e6e8ee;
             display: flex;
             align-items: center;
             gap: 10px;
         }
 
-        .toolbar-actions {
+        .bar_btns {
             display: flex;
             gap: 8px;
             align-items: center;
             flex-wrap: wrap;
         }
 
-        .badge-mode {
+        .badgemode {
             font-size: 11px;
             padding: 2px 8px;
             border-radius: 12px;
             text-transform: uppercase;
             letter-spacing: 0.05em;
             font-weight: 600;
-            background: var(--surface-subtle);
-            border: 1px solid var(--border);
-            color: var(--text-secondary);
+            background: #171a24;
+            border: 1px solid #232736;
+            color: #8b92a5;
         }
 
-        .badge-mode.active {
-            background: var(--accent-soft);
-            border-color: var(--accent);
-            color: var(--accent);
+        .badgemode.active {
+            background: rgba(79,117,255,0.12);
+            border-color: #4f75ff;
+            color: #4f75ff;
         }
 
-        .badge-match {
+        .badgematch {
             font-size: 11px;
             padding: 2px 6px;
             border-radius: 4px;
             background: rgba(48, 164, 108, 0.15);
-            color: var(--success);
+            color: #30a46c;
             border: 1px solid rgba(48, 164, 108, 0.3);
-            font-family: var(--mono);
+            font-family: 'JetBrains Mono', SFMono-Regular, Consolas, Menlo, monospace;
         }
 
-        .badge-mismatch {
+        .badgemismatch {
             font-size: 11px;
             padding: 2px 6px;
             border-radius: 4px;
             background: rgba(229, 72, 77, 0.15);
-            color: var(--danger);
+            color: #e5484d;
             border: 1px solid rgba(229, 72, 77, 0.3);
-            font-family: var(--mono);
+            font-family: 'JetBrains Mono', SFMono-Regular, Consolas, Menlo, monospace;
         }
 
-        .pdf-controls {
+        .pdfcontrols {
             display: flex;
             gap: 8px;
             align-items: center;
@@ -582,111 +563,111 @@
             flex-wrap: wrap;
         }
 
-        .pdf-page-indicator {
+        .pdfpageindicator {
             font-size: 12px;
-            color: var(--text-secondary);
-            font-family: var(--mono);
+            color: #8b92a5;
+            font-family: 'JetBrains Mono', SFMono-Regular, Consolas, Menlo, monospace;
         }
 
-        .diff-container {
+        .diffcontainer {
             display: grid;
             grid-template-columns: 1fr 1fr;
             gap: 12px;
             margin-top: 12px;
         }
 
-        .diff-pane {
-            background: var(--code-bg);
-            border: 1px solid var(--border);
+        .diffpane {
+            background: #0c0d12;
+            border: 1px solid #232736;
             border-radius: 6px;
             padding: 12px;
-            font-family: var(--mono);
+            font-family: 'JetBrains Mono', SFMono-Regular, Consolas, Menlo, monospace;
             font-size: 12px;
             line-height: 1.5;
             overflow-x: auto;
             max-height: 400px;
         }
 
-        .diff-added {
+        .diffadded {
             background: rgba(48, 164, 108, 0.15);
             color: #4ade80;
         }
 
-        .diff-removed {
+        .diffremoved {
             background: rgba(229, 72, 77, 0.15);
             color: #f87171;
         }
 
-        .font-tester-box {
-            background: var(--surface);
-            border: 1px solid var(--border);
+        .fontbox {
+            background: #11131a;
+            border: 1px solid #232736;
             border-radius: 6px;
             padding: 20px;
             margin-top: 12px;
         }
 
-        .font-preview-text {
+        .fontpreviewtext {
             outline: none;
             padding: 12px;
-            background: var(--code-bg);
-            border: 1px solid var(--border);
+            background: #0c0d12;
+            border: 1px solid #232736;
             border-radius: 4px;
-            color: var(--text-primary);
+            color: #e6e8ee;
             margin-top: 10px;
             min-height: 80px;
         }
 
-        mark.search-highlight {
+        mark.searchhighlight {
             background: #eab308;
             color: #000000;
             padding: 0 2px;
             border-radius: 2px;
         }
 
-        .palette-row {
+        .paletterow {
             display: flex;
             gap: 10px;
             margin-top: 12px;
             flex-wrap: wrap;
         }
 
-        .palette-swatch {
+        .paletteswatch {
             display: flex;
             flex-direction: column;
             align-items: center;
             cursor: pointer;
         }
 
-        .palette-color {
+        .palettecolor {
             width: 48px;
             height: 48px;
             border-radius: 6px;
-            border: 1px solid var(--border);
+            border: 1px solid #232736;
             transition: transform 0.15s ease;
         }
 
-        .palette-color:hover {
+        .palettecolor:hover {
             transform: scale(1.08);
         }
 
-        .palette-label {
+        .palettelabel {
             font-size: 11px;
-            font-family: var(--mono);
-            color: var(--text-secondary);
+            font-family: 'JetBrains Mono', SFMono-Regular, Consolas, Menlo, monospace;
+            color: #8b92a5;
             margin-top: 4px;
         }
 
-        .url-loader-row {
+        .urlloaderrow {
             display: flex;
             gap: 8px;
             margin-bottom: 20px;
         }
 
-        .url-loader-row input {
+        .urlloaderrow input {
             flex: 1;
         }
 
-        .footerlinks {
+        .botlink {
             display: inline-block;
             text-decoration: none;
             padding: 10px 20px;
@@ -700,7 +681,7 @@
             color: #a2c3ff;
         }
 
-        .footer {
+        .bottomwrap {
             align-items: center;
             justify-content: center;
             display: flex;
@@ -713,62 +694,62 @@
             border: 0;
             border-top: 1px solid #03183f;
             margin: 1em 0;
-            padding: 0;
+            padding: 0px;
         }
 
         .madebyme {
             text-align: center;
             font-size: 12px;
-            color: var(--text-secondary);
-            font-family: var(--mono);
+            color: #8b92a5;
+            font-family: 'JetBrains Mono', SFMono-Regular, Consolas, Menlo, monospace;
         }
     </style>
 </head>
 
 <body>
     <div class="container">
-        <header>
+        <div class="topbanner">
             <h1>FilePeek</h1>
             <p class="subtitle">Inspect, compare, sanitize, convert, and edit file headers, entropy, archives, and hex
                 buffers</p>
-        </header>
+        </div>
 
-        <div class="url-loader-row">
-            <input type="text" id="url-input" placeholder="Or inspect a public web URL (CORS supported)...">
-            <button id="url-fetch-btn">Load URL</button>
+        <div class="urlloaderrow">
+            <input type="text" id="urlinput" placeholder="Or inspect a public web URL (CORS supported)...">
+            <button id="urlfetchbtn">Load URL</button>
         </div>
 
         <div id="dropZone">
-            <div class="drop-title">Drop file here</div>
-            <div class="drop-sub">or click to browse</div>
+            <div class="droptitle">Drop file here</div>
+            <div class="dropsub">or click to browse</div>
         </div>
 
         <input type="file" id="fileInput">
-        <input type="file" id="diffFileInput" style="display:none;">
+        <input type="file" id="diffinputbox" style="display:none;">
 
         <div id="output">
-            <div class="empty-state">No file loaded</div>
+            <div class="emptystate">No file loaded</div>
         </div>
     </div>
 
     <script type="module">
         const fileInput = document.getElementById('fileInput');
-        const diffFileInput = document.getElementById('diffFileInput');
+        const diffinputbox = document.getElementById('diffinputbox');
         const dropZone = document.getElementById('dropZone');
-        const outputDiv = document.getElementById('output');
-        const urlInput = document.getElementById('url-input');
-        const urlFetchBtn = document.getElementById('url-fetch-btn');
+        const mainoutputbox = document.getElementById('output');
+        const urltextbox = document.getElementById('urlinput');
+        const fetchurlbutton = document.getElementById('urlfetchbtn');
 
-        let currentFile = null;
-        let isEditMode = false;
-        let activeEditorData = null;
+        let thefilebullshit = null;
+        let editswitchshit = false;
+        let editdatabullshit = null;
 
         fileInput.addEventListener('change', () => {
             const file = fileInput.files[0];
             if (file) {
-                currentFile = file;
-                isEditMode = false;
-                inspectFile(file);
+                thefilebullshit = file;
+                editswitchshit = false;
+                eatthisfilebullshit(file);
             }
         });
 
@@ -790,236 +771,246 @@
             dropZone.classList.remove('dragging');
             const file = event.dataTransfer.files[0];
             if (file) {
-                currentFile = file;
-                isEditMode = false;
-                inspectFile(file);
+                thefilebullshit = file;
+                editswitchshit = false;
+                eatthisfilebullshit(file);
             }
         });
 
-        if (urlFetchBtn && urlInput) {
-            urlFetchBtn.addEventListener('click', async () => {
-                const url = urlInput.value.trim();
-                if (!url) return;
-                urlFetchBtn.disabled = true;
-                urlFetchBtn.textContent = 'Fetching...';
-                try {
-                    const response = await fetch(url);
-                    if (!response.ok) throw new Error(`HTTP ${response.status}`);
-                    const blob = await response.blob();
-                    const urlParts = url.split('/');
-                    const filename = urlParts[urlParts.length - 1].split('?')[0] || 'remote_file';
-                    const fetchedFile = new File([blob], filename, { type: blob.type });
-                    currentFile = fetchedFile;
-                    isEditMode = false;
-                    inspectFile(fetchedFile);
-                } catch (err) {
-                    alert(`Failed to load URL: ${err.message}. Check CORS permissions.`);
-                } finally {
-                    urlFetchBtn.disabled = false;
-                    urlFetchBtn.textContent = 'Load URL';
-                }
-            });
+        async function fetchRemoteFileUrl() {
+            const url = urltextbox.value.trim();
+            if (!url) return;
+            fetchurlbutton.disabled = true;
+            fetchurlbutton.textContent = 'Fetching...';
+            try {
+                const response = await fetch(url);
+                if (!response.ok) throw new Error(`HTTP ${response.status}`);
+                const blob = await response.blob();
+                const parts = url.split('/');
+                const name = parts[parts.length - 1].split('?')[0] || 'remote_file';
+                const file = new File([blob], name, { type: blob.type });
+                thefilebullshit = file;
+                editswitchshit = false;
+                eatthisfilebullshit(file);
+            } catch (err) {
+                alert(`Failed to load URL: ${err.message}. Check CORS permissions.`);
+            } finally {
+                fetchurlbutton.disabled = false;
+                fetchurlbutton.textContent = 'Load URL';
+            }
+        }
+        if (fetchurlbutton && urltextbox) {
+            fetchurlbutton.onclick = fetchRemoteFileUrl;
         }
 
-        async function inspectFile(file) {
-            outputDiv.innerHTML = '<div class="empty-state">Analyzing file headers, entropy, and structures...</div>';
+        
+        async function eatthisfilebullshit(file) {
+            mainoutputbox.innerHTML = '<div class="emptystate">Analyzing file headers, entropy, and structures...</div>';
 
             try {
-                const ext = getFileExtension(file.name);
+                const ext = gettheextshit(file.name);
                 const mime = file.type || '';
 
-                let toolbarHtml = `
-                    <div class="toolbar">
-                        <div class="toolbar-info">
-                            <span>${escapeHtml(file.name)}</span>
-                            <span class="badge-mode ${isEditMode ? 'active' : ''}">${isEditMode ? 'Edit Mode' : 'View Mode'}</span>
+                let topBarHtml = `
+                    <div class="bar">
+                        <div class="bar_info">
+                            <span>${sanitizetextshit(file.name)}</span>
+                            <span class="badgemode ${editswitchshit ? 'active' : ''}">${editswitchshit ? 'Edit Mode' : 'View Mode'}</span>
                         </div>
-                        <div class="toolbar-actions">
-                            <button id="compare-file-btn">Compare with File (Diff)</button>
-                            <button id="toggle-edit-mode-btn" class="${isEditMode ? '' : 'btn-primary'}">
-                                ${isEditMode ? 'Switch to View Mode' : 'Edit Mode'}
+                        <div class="bar_btns">
+                            <button id="comparefilebtn">Compare with File (Diff)</button>
+                            <button id="toggleeditmodebtn" class="${editswitchshit ? '' : 'btnprimary'}">
+                                ${editswitchshit ? 'Exit Edit Mode' : 'Edit Mode'}
                             </button>
-                            ${isEditMode ? `<button id="download-edited-btn" class="btn-primary">Download Modified File</button>` : ''}
+                            ${editswitchshit ? `<button id="downloadeditedbtn" class="btnprimary">Save & Download</button>` : ''}
                         </div>
                     </div>
-                    <div id="diff-section-container"></div>
+                    <div id="diffsectioncontainer"></div>
                 `;
 
                 const sections = [];
                 const bufferHeader = await file.slice(0, 16).arrayBuffer();
-                const magicInfo = detectMagicSignature(new Uint8Array(bufferHeader), ext);
+                const magicInfo = sniffsignatureshit(new Uint8Array(bufferHeader), ext);
 
-                sections.push(renderBasicFileInfo(file, magicInfo));
-                sections.push(renderHashSection(file));
-                sections.push(await renderEntropySection(file));
-                sections.push(await renderBase64Section(file));
+                sections.push(makebasicfileinfoshit(file, magicInfo));
+                sections.push(makehashsectionshit(file));
+                sections.push(await doentropyshit(file));
+                sections.push(await makebase64shit(file));
 
-                if (isSvg(mime, ext)) {
-                    sections.push(await handleSvg(file));
-                } else if (isFont(mime, ext)) {
-                    sections.push(await handleFont(file));
-                } else if (isZipArchive(mime, ext, magicInfo)) {
-                    sections.push(await handleArchive(file));
-                } else if (isImage(mime, ext, magicInfo)) {
-                    sections.push(await handleImage(file));
-                } else if (isPdf(mime, ext, magicInfo)) {
-                    sections.push(await handlePdf(file));
-                } else if (isAudio(mime, ext)) {
-                    sections.push(await handleAudio(file));
-                } else if (isVideo(mime, ext)) {
-                    sections.push(await handleVideo(file));
-                } else if (isHtml(mime, ext)) {
-                    sections.push(await handleHtml(file));
-                } else if (isMarkdown(mime, ext)) {
-                    sections.push(await handleMarkdown(file));
-                } else if (isDelimitedTable(ext)) {
-                    sections.push(await handleDelimitedTable(file, ext));
-                } else if (isJsonFile(mime, ext)) {
-                    sections.push(await handleJson(file));
-                } else if (isText(mime, ext)) {
-                    sections.push(await handleText(file));
+                const isSvg = ext === 'svg' || mime === 'image/svg+xml';
+                const isFont = ['ttf', 'otf', 'woff', 'woff2'].includes(ext) || mime.startsWith('font/');
+                const isZip = (magicInfo?.detected && magicInfo.name.includes('ZIP')) || ['zip', 'jar', 'apk', 'docx', 'xlsx', 'pptx', 'epub'].includes(ext);
+                const isImg = (magicInfo?.detected && magicInfo.name.includes('Image')) || mime.startsWith('image/') || ['jpg', 'jpeg', 'png', 'gif', 'webp', 'bmp', 'tiff', 'tif', 'heic', 'heif', 'avif'].includes(ext);
+                const isPdf = (magicInfo?.detected && magicInfo.name.includes('PDF')) || mime === 'application/pdf' || ext === 'pdf';
+                const isAudio = mime.startsWith('audio/') || ['mp3', 'wav', 'ogg', 'aac', 'flac', 'm4a', 'weba'].includes(ext);
+                const isVideo = mime.startsWith('video/') || ['mp4', 'webm', 'ogg', 'mov', 'avi', 'mkv', 'flv'].includes(ext);
+                const isHtml = mime === 'text/html' || ['html', 'htm', 'xhtml'].includes(ext);
+                const isMd = mime === 'text/markdown' || ['md', 'markdown', 'mdown', 'mkd'].includes(ext);
+                const isTable = ['csv', 'tsv'].includes(ext);
+                const isJson = mime === 'application/json' || ext === 'json';
+                const isTxt = mime.startsWith('text/') || mime === 'application/javascript' || mime === 'application/xml' || [
+                    'txt', 'md', 'json', 'js', 'mjs', 'ts', 'jsx', 'tsx', 'html', 'htm', 'css',
+                    'scss', 'less', 'xml', 'svg', 'csv', 'tsv', 'yaml', 'yml', 'ini', 'cfg',
+                    'conf', 'env', 'sh', 'bat', 'cmd', 'ps1', 'py', 'rb', 'java', 'c', 'cpp',
+                    'h', 'hpp', 'cs', 'go', 'rs', 'php', 'sql', 'log'
+                ].includes(ext);
+
+                if (isSvg) {
+                    sections.push(await showsvgpreviewshit(file));
+                } else if (isFont) {
+                    sections.push(await setupfonttestershit(file));
+                } else if (isZip) {
+                    sections.push(await unpackziparchiveshit(file));
+                } else if (isImg) {
+                    sections.push(await showpicturestuffshit(file));
+                } else if (isPdf) {
+                    sections.push(await showpdfdocumentshit(file));
+                } else if (isAudio) {
+                    sections.push(await showaudiotrackshit(file));
+                } else if (isVideo) {
+                    sections.push(await showvideotrackshit(file));
+                } else if (isHtml) {
+                    sections.push(await showhtmlpreviewshit(file));
+                } else if (isMd) {
+                    sections.push(await showmarkdownpreviewshit(file));
+                } else if (isTable) {
+                    sections.push(await showcsvtableshit(file, ext));
+                } else if (isJson) {
+                    sections.push(await showjsonpreviewshit(file));
+                } else if (isTxt) {
+                    sections.push(await showplaintextshit(file));
                 } else {
-                    sections.push(await handleBinary(file));
+                    sections.push(await showrawbinaryshit(file));
                 }
 
-                outputDiv.innerHTML = toolbarHtml + sections.join('<div class="divider"></div>');
+                if (editswitchshit) {
+                    sections.push(`<div class="sectionblock"><div class="sectionheaderrow"><div class="sectionheader">Hex Editor</div></div>${await hexgridbuildingshit(file)}</div>`);
+                }
+                mainoutputbox.innerHTML = topBarHtml + sections.join('<div class="divider"></div>');
 
-                wireToolbarEvents();
-                computeAndRenderHashes(file);
+                hookupbarshit();
+                calcourhashesbullshit(file);
 
             } catch (error) {
-                outputDiv.innerHTML = `<div class="error-state">Error: ${escapeHtml(error.message)}</div>`;
+                mainoutputbox.innerHTML = `<div class="errorstate">Error: ${sanitizetextshit(error.message)}</div>`;
             }
         }
 
-        function wireToolbarEvents() {
-            const toggleBtn = document.getElementById('toggle-edit-mode-btn');
-            const downloadBtn = document.getElementById('download-edited-btn');
-            const compareBtn = document.getElementById('compare-file-btn');
+        function hookupbarshit() {
+            const toggleBtn = document.getElementById('toggleeditmodebtn');
+            const downloadBtn = document.getElementById('downloadeditedbtn');
+            const compareBtn = document.getElementById('comparefilebtn');
 
             if (toggleBtn) {
                 toggleBtn.addEventListener('click', () => {
-                    isEditMode = !isEditMode;
-                    inspectFile(currentFile);
+                    editswitchshit = !editswitchshit;
+                    eatthisfilebullshit(thefilebullshit);
                 });
             }
 
             if (downloadBtn) {
                 downloadBtn.addEventListener('click', () => {
-                    saveAndDownloadCurrent();
+                    saveanddownloadshit();
                 });
             }
 
             if (compareBtn) {
                 compareBtn.addEventListener('click', () => {
-                    diffFileInput.click();
+                    diffinputbox.click();
                 });
             }
         }
 
-        diffFileInput.addEventListener('change', async () => {
-            const diffFile = diffFileInput.files[0];
-            if (!diffFile || !currentFile) return;
+        function isTextType(mime, ext) {
+            if (mime.startsWith('text/') || mime === 'application/javascript' || mime === 'application/xml') return true;
+            return ['txt', 'md', 'json', 'js', 'mjs', 'ts', 'jsx', 'tsx', 'html', 'htm', 'css', 'scss', 'less', 'xml', 'svg', 'csv', 'tsv', 'yaml', 'yml', 'ini', 'cfg', 'conf', 'env', 'sh', 'bat', 'cmd', 'ps1', 'py', 'rb', 'java', 'c', 'cpp', 'h', 'hpp', 'cs', 'go', 'rs', 'php', 'sql', 'log'].includes(ext);
+        }
 
-            const diffContainer = document.getElementById('diff-section-container');
+        function createTextDiffPanes(t1, t2) {
+            const lines1 = t1.split(/\r\n|\r|\n/);
+            const lines2 = t2.split(/\r\n|\r|\n/);
+            let out1 = '', out2 = '';
+            const max = Math.max(lines1.length, lines2.length);
+            for (let i = 0; i < max; i++) {
+                const l1 = lines1[i] !== undefined ? lines1[i] : '';
+                const l2 = lines2[i] !== undefined ? lines2[i] : '';
+                if (l1 !== l2) {
+                    out1 += `<div class="diffremoved">- ${sanitizetextshit(l1 || ' ')}</div>`;
+                    out2 += `<div class="diffadded">+ ${sanitizetextshit(l2 || ' ')}</div>`;
+                } else {
+                    out1 += `<div>  ${sanitizetextshit(l1 || ' ')}</div>`;
+                    out2 += `<div>  ${sanitizetextshit(l2 || ' ')}</div>`;
+                }
+            }
+            return { pane1: out1, pane2: out2 };
+        }
+
+        function createHexDiffPanes(b1, b2) {
+            let dump1 = '', dump2 = '';
+            const limit = Math.min(1024, Math.max(b1.length, b2.length));
+            for (let i = 0; i < limit; i += 16) {
+                const off = i.toString(16).padStart(8, '0');
+                let r1 = '', r2 = '';
+                for (let j = 0; j < 16; j++) {
+                    const idx = i + j;
+                    const byte1 = b1[idx];
+                    const byte2 = b2[idx];
+                    const hex1 = byte1 !== undefined ? byte1.toString(16).padStart(2, '0').toUpperCase() : '  ';
+                    const hex2 = byte2 !== undefined ? byte2.toString(16).padStart(2, '0').toUpperCase() : '  ';
+                    r1 += byte1 !== byte2 ? `<span class="diffremoved">${hex1}</span> ` : `${hex1} `;
+                    r2 += byte1 !== byte2 ? `<span class="diffadded">${hex2}</span> ` : `${hex2} `;
+                }
+                dump1 += `${off}  ${r1}\n`;
+                dump2 += `${off}  ${r2}\n`;
+            }
+            return { pane1: `<pre>${dump1}</pre>`, pane2: `<pre>${dump2}</pre>` };
+        }
+
+        async function executeFileComparison() {
+            const diffFile = diffinputbox.files[0];
+            if (!diffFile || !thefilebullshit) return;
+            const diffContainer = document.getElementById('diffsectioncontainer');
             if (!diffContainer) return;
-
-            diffContainer.innerHTML = '<div class="empty-state">Comparing files...</div>';
+            diffContainer.innerHTML = '<div class="emptystate">Comparing files...</div>';
 
             try {
-                const ext1 = getFileExtension(currentFile.name);
-                const ext2 = getFileExtension(diffFile.name);
-                const isTextual = isText(currentFile.type || '', ext1) && isText(diffFile.type || '', ext2);
+                const ext1 = gettheextshit(thefilebullshit.name);
+                const ext2 = gettheextshit(diffFile.name);
+                const isTextual = isTextType(thefilebullshit.type || '', ext1) && isTextType(diffFile.type || '', ext2);
 
+                let diffTitle = '', panes;
                 if (isTextual) {
-                    const text1 = await currentFile.text();
-                    const text2 = await diffFile.text();
-                    const lines1 = text1.split(/\r\n|\r|\n/);
-                    const lines2 = text2.split(/\r\n|\r|\n/);
-
-                    let out1 = '';
-                    let out2 = '';
-                    const maxLines = Math.max(lines1.length, lines2.length);
-
-                    for (let i = 0; i < maxLines; i++) {
-                        const l1 = lines1[i] !== undefined ? lines1[i] : '';
-                        const l2 = lines2[i] !== undefined ? lines2[i] : '';
-
-                        if (l1 !== l2) {
-                            out1 += `<div class="diff-removed">- ${escapeHtml(l1 || ' ')}</div>`;
-                            out2 += `<div class="diff-added">+ ${escapeHtml(l2 || ' ')}</div>`;
-                        } else {
-                            out1 += `<div>  ${escapeHtml(l1 || ' ')}</div>`;
-                            out2 += `<div>  ${escapeHtml(l2 || ' ')}</div>`;
-                        }
-                    }
-
-                    diffContainer.innerHTML = `
-                        <div class="section-block">
-                            <div class="section-header-row">
-                                <div class="section-header">Text Diff: ${escapeHtml(currentFile.name)} vs ${escapeHtml(diffFile.name)}</div>
-                            </div>
-                            <div class="diff-container">
-                                <div class="diff-pane">${out1}</div>
-                                <div class="diff-pane">${out2}</div>
-                            </div>
-                        </div>
-                        <div class="divider"></div>
-                    `;
+                    const [t1, t2] = await Promise.all([thefilebullshit.text(), diffFile.text()]);
+                    diffTitle = `Text Diff: ${sanitizetextshit(thefilebullshit.name)} vs ${sanitizetextshit(diffFile.name)}`;
+                    panes = createTextDiffPanes(t1, t2);
                 } else {
-                    const buf1 = await currentFile.slice(0, 1024).arrayBuffer();
-                    const buf2 = await diffFile.slice(0, 1024).arrayBuffer();
-                    const b1 = new Uint8Array(buf1);
-                    const b2 = new Uint8Array(buf2);
-
-                    let dump1 = '';
-                    let dump2 = '';
-                    const limit = Math.min(1024, Math.max(b1.length, b2.length));
-
-                    for (let i = 0; i < limit; i += 16) {
-                        const offset = i.toString(16).padStart(8, '0');
-                        let row1 = '';
-                        let row2 = '';
-
-                        for (let j = 0; j < 16; j++) {
-                            const idx = i + j;
-                            const byte1 = b1[idx];
-                            const byte2 = b2[idx];
-                            const hex1 = byte1 !== undefined ? byte1.toString(16).padStart(2, '0').toUpperCase() : '  ';
-                            const hex2 = byte2 !== undefined ? byte2.toString(16).padStart(2, '0').toUpperCase() : '  ';
-
-                            if (byte1 !== byte2) {
-                                row1 += `<span class="diff-removed">${hex1}</span> `;
-                                row2 += `<span class="diff-added">${hex2}</span> `;
-                            } else {
-                                row1 += `${hex1} `;
-                                row2 += `${hex2} `;
-                            }
-                        }
-
-                        dump1 += `${offset}  ${row1}\n`;
-                        dump2 += `${offset}  ${row2}\n`;
-                    }
-
-                    diffContainer.innerHTML = `
-                        <div class="section-block">
-                            <div class="section-header-row">
-                                <div class="section-header">Binary Hex Diff (First 1 KB): ${escapeHtml(currentFile.name)} vs ${escapeHtml(diffFile.name)}</div>
-                            </div>
-                            <div class="diff-container">
-                                <div class="diff-pane"><pre>${dump1}</pre></div>
-                                <div class="diff-pane"><pre>${dump2}</pre></div>
-                            </div>
-                        </div>
-                        <div class="divider"></div>
-                    `;
+                    const [buf1, buf2] = await Promise.all([
+                        thefilebullshit.slice(0, 1024).arrayBuffer(),
+                        diffFile.slice(0, 1024).arrayBuffer()
+                    ]);
+                    diffTitle = `Binary Hex Diff (First 1 KB): ${sanitizetextshit(thefilebullshit.name)} vs ${sanitizetextshit(diffFile.name)}`;
+                    panes = createHexDiffPanes(new Uint8Array(buf1), new Uint8Array(buf2));
                 }
-            } catch (err) {
-                diffContainer.innerHTML = `<div class="error-state">Diff failed: ${escapeHtml(err.message)}</div>`;
-            }
-        });
 
-        function triggerDownload(blob, filename) {
+                diffContainer.innerHTML = `
+                    <div class="sectionblock">
+                        <div class="sectionheaderrow">
+                            <div class="sectionheader">${diffTitle}</div>
+                        </div>
+                        <div class="diffcontainer">
+                            <div class="diffpane">${panes.pane1}</div>
+                            <div class="diffpane">${panes.pane2}</div>
+                        </div>
+                    </div>
+                    <div class="divider"></div>
+                `;
+            } catch (err) {
+                diffContainer.innerHTML = `<div class="errorstate">Diff failed: ${sanitizetextshit(err.message)}</div>`;
+            }
+        }
+        diffinputbox.onchange = executeFileComparison;
+
+        function downloadblobshit(blob, filename) {
             const url = URL.createObjectURL(blob);
             const a = document.createElement('a');
             a.href = url;
@@ -1030,26 +1021,26 @@
             URL.revokeObjectURL(url);
         }
 
-        function saveAndDownloadCurrent() {
-            if (!currentFile || !activeEditorData) return;
+        function saveanddownloadshit() {
+            if (!thefilebullshit || !editdatabullshit) return;
 
-            if (activeEditorData.type === 'text') {
-                const textarea = document.getElementById('text-editor-input');
-                const content = textarea ? textarea.value : activeEditorData.content;
-                const blob = new Blob([content], { type: currentFile.type || 'text/plain' });
-                triggerDownload(blob, currentFile.name);
-            } else if (activeEditorData.type === 'binary') {
-                const blob = new Blob([activeEditorData.bytes], { type: currentFile.type || 'application/octet-stream' });
-                triggerDownload(blob, currentFile.name);
+            if (editdatabullshit.type === 'text') {
+                const textarea = document.getElementById('texteditorinput');
+                const content = textarea ? textarea.value : editdatabullshit.content;
+                const blob = new Blob([content], { type: thefilebullshit.type || 'text/plain' });
+                downloadblobshit(blob, thefilebullshit.name);
+            } else if (editdatabullshit.type === 'binary') {
+                const blob = new Blob([editdatabullshit.bytes], { type: thefilebullshit.type || 'application/octet-stream' });
+                downloadblobshit(blob, thefilebullshit.name);
             }
         }
 
-        function getFileExtension(filename) {
+        function gettheextshit(filename) {
             const dot = filename.lastIndexOf('.');
             return dot !== -1 ? filename.substring(dot + 1).toLowerCase() : '';
         }
 
-        function formatBytes(bytes) {
+        function formatbytesshit(bytes) {
             if (bytes === 0) return '0 Bytes';
             const k = 1024;
             const sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB'];
@@ -1057,7 +1048,7 @@
             return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
         }
 
-        function formatDuration(seconds) {
+        function nicetimeshit(seconds) {
             if (!isFinite(seconds) || isNaN(seconds)) return 'Unknown';
             const mins = Math.floor(seconds / 60);
             const secs = Math.floor(seconds % 60);
@@ -1065,7 +1056,8 @@
             return `${mins}m ${secs}s ${ms}ms (${seconds.toFixed(2)}s)`;
         }
 
-        function detectMagicSignature(bytes, ext) {
+        
+        function sniffsignatureshit(bytes, ext) {
             const hex = Array.from(bytes).map(b => b.toString(16).padStart(2, '0').toUpperCase()).join(' ');
 
             const signatures = [
@@ -1118,108 +1110,41 @@
             };
         }
 
-        function isZipArchive(mime, ext, magic) {
-            if (magic && magic.detected && magic.name.includes('ZIP')) return true;
-            return ['zip', 'jar', 'apk', 'docx', 'xlsx', 'pptx', 'epub'].includes(ext);
-        }
+        
 
-        function isSvg(mime, ext) {
-            return ext === 'svg' || mime === 'image/svg+xml';
-        }
-
-        function isFont(mime, ext) {
-            return ['ttf', 'otf', 'woff', 'woff2'].includes(ext) || mime.startsWith('font/');
-        }
-
-        function isImage(mime, ext, magic) {
-            if (magic && magic.detected && magic.name.includes('Image')) return true;
-            return mime.startsWith('image/') ||
-                ['jpg', 'jpeg', 'png', 'gif', 'webp', 'bmp', 'tiff', 'tif', 'heic', 'heif', 'avif'].includes(ext);
-        }
-
-        function isPdf(mime, ext, magic) {
-            if (magic && magic.detected && magic.name.includes('PDF')) return true;
-            return mime === 'application/pdf' || ext === 'pdf';
-        }
-
-        function isAudio(mime, ext) {
-            return mime.startsWith('audio/') ||
-                ['mp3', 'wav', 'ogg', 'aac', 'flac', 'm4a', 'weba'].includes(ext);
-        }
-
-        function isVideo(mime, ext) {
-            return mime.startsWith('video/') ||
-                ['mp4', 'webm', 'ogg', 'mov', 'avi', 'mkv', 'flv'].includes(ext);
-        }
-
-        function isHtml(mime, ext) {
-            return mime === 'text/html' || ['html', 'htm', 'xhtml'].includes(ext);
-        }
-
-        function isMarkdown(mime, ext) {
-            return mime === 'text/markdown' || ['md', 'markdown', 'mdown', 'mkd'].includes(ext);
-        }
-
-        function isDelimitedTable(ext) {
-            return ['csv', 'tsv'].includes(ext);
-        }
-
-        function isJsonFile(mime, ext) {
-            return mime === 'application/json' || ext === 'json';
-        }
-
-        function isText(mime, ext) {
-            if (
-                mime.startsWith('text/') ||
-                mime === 'application/javascript' ||
-                mime === 'application/xml'
-            ) {
-                return true;
-            }
-
-            const textExtensions = [
-                'txt', 'md', 'json', 'js', 'mjs', 'ts', 'jsx', 'tsx', 'html', 'htm', 'css',
-                'scss', 'less', 'xml', 'svg', 'csv', 'tsv', 'yaml', 'yml', 'ini', 'cfg',
-                'conf', 'env', 'sh', 'bat', 'cmd', 'ps1', 'py', 'rb', 'java', 'c', 'cpp',
-                'h', 'hpp', 'cs', 'go', 'rs', 'php', 'sql', 'log'
-            ];
-
-            return textExtensions.includes(ext);
-        }
-
-        function renderBasicFileInfo(file, magic) {
+        function makebasicfileinfoshit(file, magic) {
             const modified = file.lastModified ? new Date(file.lastModified).toISOString().replace('T', ' ').replace('Z', ' UTC') : 'Unknown';
             const sigStatus = magic.detected
-                ? (magic.matchesExt ? `<span class="badge-match">Matches File Extension</span>` : `<span class="badge-mismatch">Mismatch: Expected ${escapeHtml(magic.name)}</span>`)
+                ? (magic.matchesExt ? `<span class="badgematch">Matches File Extension</span>` : `<span class="badgemismatch">Mismatch: Expected ${sanitizetextshit(magic.name)}</span>`)
                 : '';
 
             return `
-                <div class="section-block">
-                    <div class="section-header-row">
-                        <div class="section-header">File Information</div>
+                <div class="sectionblock">
+                    <div class="sectionheaderrow">
+                        <div class="sectionheader">Basic File Info</div>
                     </div>
-                    <div class="table-wrap">
+                    <div class="tablewrap">
                         <table>
                             <tbody>
                                 <tr>
-                                    <td class="cell-key">Name</td>
-                                    <td class="cell-val">${escapeHtml(file.name)}</td>
+                                    <td class="cellkey">Name</td>
+                                    <td class="cellval">${sanitizetextshit(file.name)}</td>
                                 </tr>
                                 <tr>
-                                    <td class="cell-key">Size</td>
-                                    <td class="cell-val">${escapeHtml(formatBytes(file.size))} (${file.size.toLocaleString()} bytes)</td>
+                                    <td class="cellkey">Size</td>
+                                    <td class="cellval">${sanitizetextshit(formatbytesshit(file.size))} (${file.size.toLocaleString()} bytes)</td>
                                 </tr>
                                 <tr>
-                                    <td class="cell-key">MIME Type</td>
-                                    <td class="cell-val">${escapeHtml(file.type || 'Unknown')}</td>
+                                    <td class="cellkey">MIME Type</td>
+                                    <td class="cellval">${sanitizetextshit(file.type || 'Unknown')}</td>
                                 </tr>
                                 <tr>
-                                    <td class="cell-key">Magic Header</td>
-                                    <td class="cell-val">${escapeHtml(magic.name)} (${escapeHtml(magic.signature)}) ${sigStatus}</td>
+                                    <td class="cellkey">Magic Header</td>
+                                    <td class="cellval">${sanitizetextshit(magic.name)} (${sanitizetextshit(magic.signature)}) ${sigStatus}</td>
                                 </tr>
                                 <tr>
-                                    <td class="cell-key">Modified</td>
-                                    <td class="cell-val">${escapeHtml(modified)}</td>
+                                    <td class="cellkey">Modified</td>
+                                    <td class="cellval">${sanitizetextshit(modified)}</td>
                                 </tr>
                             </tbody>
                         </table>
@@ -1228,22 +1153,23 @@
             `;
         }
 
-        function renderHashSection(file) {
+        
+        function makehashsectionshit(file) {
             return `
-                <div class="section-block">
-                    <div class="section-header-row">
-                        <div class="section-header">Cryptographic Hashes & Integrity</div>
+                <div class="sectionblock">
+                    <div class="sectionheaderrow">
+                        <div class="sectionheader">Hashes & Checksums</div>
                     </div>
-                    <div class="table-wrap">
+                    <div class="tablewrap">
                         <table>
                             <tbody>
                                 <tr>
-                                    <td class="cell-key">SHA-256</td>
-                                    <td class="cell-val cell-mono" id="hash-sha256">Computing...</td>
+                                    <td class="cellkey">SHA-256</td>
+                                    <td class="cellval cellmono" id="hashsha256">Computing...</td>
                                 </tr>
                                 <tr>
-                                    <td class="cell-key">SHA-1</td>
-                                    <td class="cell-val cell-mono" id="hash-sha1">Computing...</td>
+                                    <td class="cellkey">SHA-1</td>
+                                    <td class="cellval cellmono" id="hashsha1">Computing...</td>
                                 </tr>
                             </tbody>
                         </table>
@@ -1252,7 +1178,7 @@
             `;
         }
 
-        async function computeAndRenderHashes(file) {
+        async function calcourhashesbullshit(file) {
             try {
                 const buffer = await file.arrayBuffer();
                 const sha256Buffer = await crypto.subtle.digest('SHA-256', buffer);
@@ -1261,17 +1187,17 @@
                 const sha256Hex = Array.from(new Uint8Array(sha256Buffer)).map(b => b.toString(16).padStart(2, '0')).join('');
                 const sha1Hex = Array.from(new Uint8Array(sha1Buffer)).map(b => b.toString(16).padStart(2, '0')).join('');
 
-                const elSha256 = document.getElementById('hash-sha256');
-                const elSha1 = document.getElementById('hash-sha1');
+                const elSha256 = document.getElementById('hashsha256');
+                const elSha1 = document.getElementById('hashsha1');
                 if (elSha256) elSha256.textContent = sha256Hex;
                 if (elSha1) elSha1.textContent = sha1Hex;
             } catch (err) {
-                const elSha256 = document.getElementById('hash-sha256');
+                const elSha256 = document.getElementById('hashsha256');
                 if (elSha256) elSha256.textContent = 'Hash error';
             }
         }
 
-        async function renderEntropySection(file) {
+        async function doentropyshit(file) {
             const scanLimit = Math.min(file.size, 65536);
             const sliceBuffer = await file.slice(0, scanLimit).arrayBuffer();
             const bytes = new Uint8Array(sliceBuffer);
@@ -1294,13 +1220,13 @@
 
             let entropyCategory = 'Normal Text/Code (3.5 - 5.5)';
             if (entropy > 7.5) {
-                entropyCategory = 'High Entropy (Encrypted, Compressed, or Packed)';
+                entropyCategory = 'Dense / Compressed';
             } else if (entropy < 3.0) {
-                entropyCategory = 'Low Entropy (Repetitive or Sparse)';
+                entropyCategory = 'Sparse / Repetitive';
             }
 
             setTimeout(() => {
-                const canvas = document.getElementById('entropy-histogram-canvas');
+                const canvas = document.getElementById('entropyhistogramcanvas');
                 if (canvas && len > 0) {
                     const ctx = canvas.getContext('2d');
                     ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -1309,47 +1235,47 @@
                         if (counts[i] > maxCount) maxCount = counts[i];
                     }
 
-                    const barWidth = canvas.width / 256;
+                    const bw = canvas.width / 256;
                     for (let i = 0; i < 256; i++) {
                         const h = (counts[i] / maxCount) * canvas.height;
                         ctx.fillStyle = '#4f75ff';
-                        ctx.fillRect(i * barWidth, canvas.height - h, barWidth, h);
+                        ctx.fillRect(i * bw, canvas.height - h, bw, h);
                     }
                 }
             }, 0);
 
             return `
-                <div class="section-block">
-                    <div class="section-header-row">
-                        <div class="section-header">Shannon Entropy & Randomness Distribution</div>
+                <div class="sectionblock">
+                    <div class="sectionheaderrow">
+                        <div class="sectionheader">Entropy & Byte Spread</div>
                     </div>
-                    <div class="table-wrap">
+                    <div class="tablewrap">
                         <table>
                             <tbody>
                                 <tr>
-                                    <td class="cell-key">Calculated Entropy</td>
-                                    <td class="cell-val"><strong>${entropy.toFixed(3)}</strong> / 8.000 bits per byte</td>
+                                    <td class="cellkey">Calculated Entropy</td>
+                                    <td class="cellval"><strong>${entropy.toFixed(3)}</strong> / 8.000 bits per byte</td>
                                 </tr>
                                 <tr>
-                                    <td class="cell-key">Assessment</td>
-                                    <td class="cell-val">${escapeHtml(entropyCategory)}</td>
+                                    <td class="cellkey">Assessment</td>
+                                    <td class="cellval">${sanitizetextshit(entropyCategory)}</td>
                                 </tr>
                             </tbody>
                         </table>
                     </div>
-                    <div class="sub-header">Byte Value Frequency Histogram (0x00 to 0xFF)</div>
-                    <canvas id="entropy-histogram-canvas" class="dark-canvas" width="512" height="64"></canvas>
+                    <div class="subheader">Byte Value Frequency Histogram (0x00 to 0xFF)</div>
+                    <canvas id="entropyhistogramcanvas" class="darkcanvas" width="512" height="64"></canvas>
                 </div>
             `;
         }
 
-        async function renderBase64Section(file) {
-            const maxBase64Size = 512 * 1024;
+        async function makebase64shit(file) {
+            const maxBase64Size = 350 * 1024;
             const isTooLarge = file.size > maxBase64Size;
 
             setTimeout(() => {
-                const copyBtn = document.getElementById('copy-base64-btn');
-                const base64Pre = document.getElementById('base64-text');
+                const copyBtn = document.getElementById('copybase64btn');
+                const base64Pre = document.getElementById('base64text');
                 if (copyBtn && base64Pre) {
                     copyBtn.addEventListener('click', () => {
                         navigator.clipboard.writeText(base64Pre.textContent);
@@ -1361,11 +1287,11 @@
 
             if (isTooLarge) {
                 return `
-                    <div class="section-block">
-                        <div class="section-header-row">
-                            <div class="section-header">Base64 Data URI</div>
+                    <div class="sectionblock">
+                        <div class="sectionheaderrow">
+                            <div class="sectionheader">Base64 Data URI</div>
                         </div>
-                        <div class="empty-state">File exceeds 512 KB limit for live Base64 display (${formatBytes(file.size)})</div>
+                        <div class="emptystate">File exceeds 350 KB limit for live Base64 display (${formatbytesshit(file.size)})</div>
                     </div>
                 `;
             }
@@ -1380,23 +1306,23 @@
             const dataUri = `data:${file.type || 'application/octet-stream'};base64,${base64}`;
 
             return `
-                <div class="section-block">
-                    <div class="section-header-row">
-                        <div class="section-header">Base64 Data URI (${formatBytes(dataUri.length)})</div>
+                <div class="sectionblock">
+                    <div class="sectionheaderrow">
+                        <div class="sectionheader">Base64 Data URI (${formatbytesshit(dataUri.length)})</div>
                         <div>
-                            <button id="copy-base64-btn">Copy Data URI</button>
+                            <button id="copybase64btn">Copy Data URI</button>
                         </div>
                     </div>
-                    <pre id="base64-text" style="max-height: 120px;">${escapeHtml(dataUri)}</pre>
+                    <pre id="base64text" style="max-height: 120px;">${sanitizetextshit(dataUri)}</pre>
                 </div>
             `;
         }
 
-        async function handleArchive(file) {
+                async function unpackziparchiveshit(file) {
             let html = `
-                <div class="section-block">
-                    <div class="section-header-row">
-                        <div class="section-header">Archive Contents & Direct Extraction</div>
+                <div class="sectionblock">
+                    <div class="sectionheaderrow">
+                        <div class="sectionheader">Zip Archive Files</div>
                     </div>
             `;
 
@@ -1408,22 +1334,22 @@
                 entries.forEach((entry, idx) => {
                     const isDir = entry.dir;
                     const date = entry.date ? entry.date.toISOString().split('T')[0] : '-';
-                    const size = isDir ? '-' : formatBytes(entry._data ? entry._data.uncompressedSize : 0);
-                    const actionBtn = isDir ? '' : `<button class="archive-extract-btn" data-entry-name="${escapeHtml(entry.name)}">Extract</button>`;
+                    const size = isDir ? '-' : formatbytesshit(entry._data ? entry._data.uncompressedSize : 0);
+                    const actionBtn = isDir ? '' : `<button class="archiveextractbtn" data-entry-name="${sanitizetextshit(entry.name)}">Extract</button>`;
 
                     rowsHtml += `
                         <tr>
-                            <td class="cell-val" style="font-family: var(--mono);">${escapeHtml(entry.name)}</td>
-                            <td class="cell-key">${isDir ? 'Directory' : 'File'}</td>
-                            <td class="cell-key">${escapeHtml(size)}</td>
-                            <td class="cell-key">${escapeHtml(date)}</td>
+                            <td class="cellval" style="font-family: 'JetBrains Mono', SFMono-Regular, Consolas, Menlo, monospace;">${sanitizetextshit(entry.name)}</td>
+                            <td class="cellkey">${isDir ? 'Directory' : 'File'}</td>
+                            <td class="cellkey">${sanitizetextshit(size)}</td>
+                            <td class="cellkey">${sanitizetextshit(date)}</td>
                             <td>${actionBtn}</td>
                         </tr>
                     `;
                 });
 
                 html += `
-                    <div class="table-wrap">
+                    <div class="tablewrap">
                         <table>
                             <thead>
                                 <tr>
@@ -1441,33 +1367,19 @@
                     </div>
                 `;
 
-                setTimeout(() => {
-                    const buttons = document.querySelectorAll('.archive-extract-btn');
-                    buttons.forEach(btn => {
-                        btn.addEventListener('click', async () => {
-                            const entryName = btn.dataset.entryName;
-                            btn.disabled = true;
-                            btn.textContent = 'Extracting...';
-                            const fileData = await zip.file(entryName).async('blob');
-                            const baseName = entryName.split('/').pop() || 'extracted_file';
-                            triggerDownload(fileData, baseName);
-                            btn.disabled = false;
-                            btn.textContent = 'Extract';
-                        });
-                    });
-                }, 0);
+                setTimeout(() => hookZipExtractButtons(zip), 0);
 
             } catch (err) {
-                html += `<div class="error-state">Failed to unpack archive: ${escapeHtml(err.message)}</div>`;
+                html += `<div class="errorstate">Failed to unpack archive: ${sanitizetextshit(err.message)}</div>`;
             }
 
-            if (isEditMode) {
+            if (editswitchshit) {
                 html += `
                     <div class="divider"></div>
-                    <div class="section-header-row">
-                        <div class="section-header">Binary Byte Editor</div>
+                    <div class="sectionheaderrow">
+                        <div class="sectionheader">Binary Byte Editor</div>
                     </div>
-                    ${await renderHexEditor(file)}
+                    ${await hexgridbuildingshit(file)}
                 `;
             }
 
@@ -1475,9 +1387,23 @@
             return html;
         }
 
-        async function handleSvg(file) {
+                function hookZipExtractButtons(zip) {
+            document.querySelectorAll('.archiveextractbtn').forEach(btn => {
+                btn.onclick = async () => {
+                    const name = btn.dataset.entryName;
+                    btn.disabled = true;
+                    btn.textContent = 'Extracting...';
+                    const data = await zip.file(name).async('blob');
+                    downloadblobshit(data, name.split('/').pop() || 'extracted_file');
+                    btn.disabled = false;
+                    btn.textContent = 'Extract';
+                };
+            });
+        }
+
+        async function showsvgpreviewshit(file) {
             const fullText = await file.text();
-            activeEditorData = { type: 'text', content: fullText };
+            editdatabullshit = { type: 'text', content: fullText };
 
             let elementCount = 0;
             let pathCount = 0;
@@ -1494,60 +1420,60 @@
             } catch (e) { }
 
             setTimeout(() => {
-                const minifyBtn = document.getElementById('svg-minify-btn');
+                const minifyBtn = document.getElementById('svgminifybtn');
                 if (minifyBtn) {
                     minifyBtn.addEventListener('click', () => {
-                        // Who needs a 300KB AST parser when two unapologetic regular expressions
-                        // can strip XML comments and tag whitespace without asking questions.
+                        
+                        
                         let minified = fullText.replace(new RegExp('<!--[\\s\\S]*?-->', 'g'), '');
                         minified = minified.replace(new RegExp('>\\s+<', 'g'), '><').trim();
-                        triggerDownload(new Blob([minified], { type: 'image/svg+xml' }), 'minified_' + file.name);
+                        downloadblobshit(new Blob([minified], { type: 'image/svg+xml' }), 'minified_' + file.name);
                     });
                 }
             }, 0);
 
             let html = `
-                <div class="section-block">
-                    <div class="section-header-row">
-                        <div class="section-header">Vector SVG Metrics & Minifier</div>
+                <div class="sectionblock">
+                    <div class="sectionheaderrow">
+                        <div class="sectionheader">SVG Info & Minifier</div>
                         <div>
-                            <button id="svg-minify-btn" class="btn-success">Download Minified SVG</button>
+                            <button id="svgminifybtn" class="btnsuccess">Download Minified SVG</button>
                         </div>
                     </div>
-                    <div class="table-wrap">
+                    <div class="tablewrap">
                         <table>
                             <tbody>
                                 <tr>
-                                    <td class="cell-key">ViewBox</td>
-                                    <td class="cell-val">${escapeHtml(viewBox)}</td>
+                                    <td class="cellkey">ViewBox</td>
+                                    <td class="cellval">${sanitizetextshit(viewBox)}</td>
                                 </tr>
                                 <tr>
-                                    <td class="cell-key">Total Elements</td>
-                                    <td class="cell-val">${elementCount}</td>
+                                    <td class="cellkey">Total Elements</td>
+                                    <td class="cellval">${elementCount}</td>
                                 </tr>
                                 <tr>
-                                    <td class="cell-key">Path Count</td>
-                                    <td class="cell-val">${pathCount}</td>
+                                    <td class="cellkey">Path Count</td>
+                                    <td class="cellval">${pathCount}</td>
                                 </tr>
                             </tbody>
                         </table>
                     </div>
-                    <div class="sub-header">Vector Rendering</div>
-                    <div style="background:var(--surface);border:1px solid var(--border);border-radius:6px;padding:24px;text-align:center;">
-                        <img src="${URL.createObjectURL(file)}" style="max-height:300px;margin:0 auto;" alt="SVG Preview">
+                    <div class="subheader">Vector Rendering</div>
+                    <div style="background:#11131a;border:1px solid #232736;border-radius:6px;padding:24px;text-align:center;">
+                        <img src="${URL.createObjectURL(file)}" style="max-height:300px;margin: 0px auto;" alt="SVG Preview">
                     </div>
             `;
 
-            if (isEditMode) {
+            if (editswitchshit) {
                 html += `
-                    <div class="sub-header">SVG XML Source Editor</div>
-                    <textarea id="text-editor-input" class="editor-textarea">${escapeHtml(fullText)}</textarea>
+                    <div class="subheader">SVG XML Source Editor</div>
+                    <textarea id="texteditorinput" class="editortextarea">${sanitizetextshit(fullText)}</textarea>
                 `;
                 setTimeout(() => {
-                    const textarea = document.getElementById('text-editor-input');
+                    const textarea = document.getElementById('texteditorinput');
                     if (textarea) {
                         textarea.addEventListener('input', () => {
-                            activeEditorData.content = textarea.value;
+                            editdatabullshit.content = textarea.value;
                         });
                     }
                 }, 0);
@@ -1557,24 +1483,22 @@
             return html;
         }
 
-        async function handleFont(file) {
-            // Yes, we generate a random font family name on the fly because if you load two fonts
-            // with the same generic identifier, the browser silently shrugs and you end up inspecting Comic Sans.
-            const fontUrl = URL.createObjectURL(file);
-            const fontName = 'FilePeekFont_' + Math.random().toString(36).substring(2, 7);
+        async function setupfonttestershit(file) {
+                        const fontUrl = URL.createObjectURL(file);
+            const fontName = 'custom_font_' + Date.now();
 
             try {
                 const fontFace = new FontFace(fontName, `url(${fontUrl})`);
                 await fontFace.load();
                 document.fonts.add(fontFace);
             } catch (err) {
-                return `<div class="error-state">Failed to load font face: ${escapeHtml(err.message)}</div>`;
+                return `<div class="errorstate">Failed to load font face: ${sanitizetextshit(err.message)}</div>`;
             }
 
             setTimeout(() => {
-                const slider = document.getElementById('font-size-slider');
-                const label = document.getElementById('font-size-label');
-                const preview = document.getElementById('font-preview-area');
+                const slider = document.getElementById('fontsizeslider');
+                const label = document.getElementById('fontsizelabel');
+                const preview = document.getElementById('fontpreviewarea');
                 if (slider && preview) {
                     slider.addEventListener('input', () => {
                         const sz = slider.value + 'px';
@@ -1585,38 +1509,39 @@
             }, 0);
 
             return `
-                <div class="section-block">
-                    <div class="section-header-row">
-                        <div class="section-header">Font Typography Tester</div>
+                <div class="sectionblock">
+                    <div class="sectionheaderrow">
+                        <div class="sectionheader">Font Preview & Test</div>
                     </div>
-                    <div class="font-tester-box">
-                        <div class="btn-row">
-                            <label style="color:var(--text-secondary);font-size:12px;">Size: </label>
-                            <input type="range" id="font-size-slider" min="12" max="72" value="28">
-                            <span id="font-size-label" style="font-family:var(--mono);font-size:12px;">28px</span>
+                    <div class="fontbox">
+                        <div class="btnrow">
+                            <label style="color:#8b92a5;font-size:12px;">Size: </label>
+                            <input type="range" id="fontsizeslider" min="12" max="72" value="28">
+                            <span id="fontsizelabel" style="font-family:'JetBrains Mono', SFMono-Regular, Consolas, Menlo, monospace;font-size:12px;">28px</span>
                         </div>
-                        <div id="font-preview-area" class="font-preview-text" contenteditable="true" style="font-family: '${fontName}', sans-serif; font-size: 28px;">
-                            Sphinx of black quartz, judge my vow. 1234567890 !@#$%^&*()
+                        <div id="fontpreviewarea" class="fontpreviewtext" contenteditable="true" style="font-family: '${fontName}', sans-serif; font-size: 28px;">
+                            The quick brown fox jumps over the lazy dog 1234567890
                         </div>
                     </div>
                 </div>
             `;
         }
 
-        async function handleImage(file) {
+        
+        async function showpicturestuffshit(file) {
             let html = `
-                <div class="section-block">
-                    <div class="section-header-row">
-                        <div class="section-header">Image Metadata, Privacy & Converter</div>
+                <div class="sectionblock">
+                    <div class="sectionheaderrow">
+                        <div class="sectionheader">EXIF Info & Convert</div>
                     </div>
-                    <div class="btn-row">
-                        <button id="sanitize-exif-btn" class="btn-success">Strip EXIF & Clean</button>
-                        <select id="image-convert-format">
+                    <div class="btnrow">
+                        <button id="sanitizeexifbtn" class="btnsuccess">Strip EXIF & Clean</button>
+                        <select id="imageconvertformat">
                             <option value="image/png">Convert to PNG</option>
                             <option value="image/jpeg">Convert to JPEG</option>
                             <option value="image/webp">Convert to WEBP</option>
                         </select>
-                        <button id="image-convert-btn">Export Converted</button>
+                        <button id="imageconvertbtn">Export Converted</button>
                     </div>
             `;
 
@@ -1625,10 +1550,10 @@
                 const keys = Object.keys(tags).sort();
 
                 if (keys.length === 0) {
-                    html += `<div class="empty-state">No EXIF metadata found</div>`;
+                    html += `<div class="emptystate">No EXIF metadata found</div>`;
                 } else {
                     html += `
-                        <div class="table-wrap">
+                        <div class="tablewrap">
                             <table>
                                 <thead>
                                     <tr>
@@ -1649,8 +1574,8 @@
 
                         html += `
                             <tr>
-                                <td class="cell-key">${escapeHtml(key)}</td>
-                                <td class="cell-val">${escapeHtml(String(val))}</td>
+                                <td class="cellkey">${sanitizetextshit(key)}</td>
+                                <td class="cellval">${sanitizetextshit(String(val))}</td>
                             </tr>
                         `;
                     }
@@ -1662,88 +1587,26 @@
                     `;
                 }
             } catch (err) {
-                html += `<div class="error-state">Failed to read EXIF: ${escapeHtml(err.message)}</div>`;
+                html += `<div class="errorstate">Failed to read EXIF: ${sanitizetextshit(err.message)}</div>`;
             }
 
             const objectUrl = URL.createObjectURL(file);
             html += `
-                    <div class="sub-header">Dominant Color Palette</div>
-                    <div id="palette-swatches-container" class="palette-row"></div>
-                    <div class="sub-header">Preview</div>
-                    <img id="image-element" src="${objectUrl}" alt="Preview">
+                    <div class="subheader">Dominant Color Palette</div>
+                    <div id="paletteswatchescontainer" class="paletterow"></div>
+                    <div class="subheader">Preview</div>
+                    <img id="imageelement" src="${objectUrl}" alt="Preview">
             `;
 
-            setTimeout(() => {
-                const cleanBtn = document.getElementById('sanitize-exif-btn');
-                const convertBtn = document.getElementById('image-convert-btn');
-                const formatSelect = document.getElementById('image-convert-format');
-                const img = document.getElementById('image-element');
-                const paletteContainer = document.getElementById('palette-swatches-container');
+            setTimeout(() => hookImageHelpers(file), 0);
 
-                if (img) {
-                    img.addEventListener('load', () => {
-                        try {
-                            const c = document.createElement('canvas');
-                            const cx = c.getContext('2d');
-                            c.width = 100;
-                            c.height = 100;
-                            cx.drawImage(img, 0, 0, 100, 100);
-                            const imgData = cx.getImageData(0, 0, 100, 100).data;
-                            const colors = extractPalette(imgData, 6);
-
-                            if (paletteContainer) {
-                                paletteContainer.innerHTML = colors.map(hex => `
-                                    <div class="palette-swatch" onclick="navigator.clipboard.writeText('${hex}')" title="Click to copy Hex">
-                                        <div class="palette-color" style="background:${hex};"></div>
-                                        <span class="palette-label">${hex}</span>
-                                    </div>
-                                `).join('');
-                            }
-                        } catch (e) { }
-                    });
-                }
-
-                if (cleanBtn && img) {
-                    cleanBtn.addEventListener('click', () => {
-                        const canvas = document.createElement('canvas');
-                        canvas.width = img.naturalWidth || 800;
-                        canvas.height = img.naturalHeight || 600;
-                        const ctx = canvas.getContext('2d');
-                        ctx.drawImage(img, 0, 0);
-                        canvas.toBlob((blob) => {
-                            if (blob) {
-                                triggerDownload(blob, 'clean_' + file.name);
-                            }
-                        }, file.type || 'image/png');
-                    });
-                }
-
-                if (convertBtn && img && formatSelect) {
-                    convertBtn.addEventListener('click', () => {
-                        const canvas = document.createElement('canvas');
-                        canvas.width = img.naturalWidth || 800;
-                        canvas.height = img.naturalHeight || 600;
-                        const ctx = canvas.getContext('2d');
-                        ctx.drawImage(img, 0, 0);
-                        const mimeChoice = formatSelect.value;
-                        const extChoice = mimeChoice.split('/')[1];
-                        canvas.toBlob((blob) => {
-                            if (blob) {
-                                const base = file.name.substring(0, file.name.lastIndexOf('.')) || 'converted';
-                                triggerDownload(blob, `${base}.${extChoice}`);
-                            }
-                        }, mimeChoice, 0.92);
-                    });
-                }
-            }, 0);
-
-            if (isEditMode) {
+            if (editswitchshit) {
                 html += `
                     <div class="divider"></div>
-                    <div class="section-header-row">
-                        <div class="section-header">Binary Byte Editor</div>
+                    <div class="sectionheaderrow">
+                        <div class="sectionheader">Binary Byte Editor</div>
                     </div>
-                    ${await renderHexEditor(file)}
+                    ${await hexgridbuildingshit(file)}
                 `;
             }
 
@@ -1751,7 +1614,63 @@
             return html;
         }
 
-        function extractPalette(data, numColors) {
+                function drawToCanvasBlob(imgEl, mime, quality, onDone) {
+            const c = document.createElement('canvas');
+            c.width = imgEl.naturalWidth || imgEl.videoWidth || 800;
+            c.height = imgEl.naturalHeight || imgEl.videoHeight || 600;
+            c.getContext('2d').drawImage(imgEl, 0, 0);
+            c.toBlob(onDone, mime, quality);
+        }
+
+        function hookImageHelpers(file) {
+            const cleanBtn = document.getElementById('sanitizeexifbtn');
+            const convertBtn = document.getElementById('imageconvertbtn');
+            const formatSelect = document.getElementById('imageconvertformat');
+            const img = document.getElementById('imageelement');
+            const palBox = document.getElementById('paletteswatchescontainer');
+
+            if (img) {
+                img.onload = () => {
+                    try {
+                        const c = document.createElement('canvas');
+                        c.width = 100; c.height = 100;
+                        const cx = c.getContext('2d');
+                        cx.drawImage(img, 0, 0, 100, 100);
+                        const colors = pullcolorpaletteshit(cx.getImageData(0, 0, 100, 100).data, 6);
+                        if (palBox) {
+                            palBox.innerHTML = colors.map(h => `
+                                <div class="paletteswatch" onclick="navigator.clipboard.writeText('${h}')" title="Click to copy Hex">
+                                    <div class="palettecolor" style="background:${h};"></div>
+                                    <span class="palettelabel">${h}</span>
+                                </div>
+                            `).join('');
+                        }
+                    } catch (e) { }
+                };
+            }
+
+            if (cleanBtn && img) {
+                cleanBtn.onclick = () => {
+                    drawToCanvasBlob(img, file.type || 'image/png', 1.0, b => {
+                        if (b) downloadblobshit(b, 'clean_' + file.name);
+                    });
+                };
+            }
+
+            if (convertBtn && img && formatSelect) {
+                convertBtn.onclick = () => {
+                    const mime = formatSelect.value;
+                    const ext = mime.split('/')[1];
+                    drawToCanvasBlob(img, mime, 0.92, b => {
+                        if (!b) return;
+                        const base = file.name.substring(0, file.name.lastIndexOf('.')) || 'converted';
+                        downloadblobshit(b, `${base}.${ext}`);
+                    });
+                };
+            }
+        }
+
+        function pullcolorpaletteshit(data, numColors) {
             const colorCounts = {};
             for (let i = 0; i < data.length; i += 16) {
                 const r = Math.round(data[i] / 32) * 32;
@@ -1763,13 +1682,13 @@
             return Object.keys(colorCounts).sort((a, b) => colorCounts[b] - colorCounts[a]).slice(0, numColors);
         }
 
-        async function handlePdf(file) {
+        async function showpdfdocumentshit(file) {
             let html = `
-                <div class="section-block">
-                    <div class="section-header-row">
-                        <div class="section-header">Document Metadata</div>
+                <div class="sectionblock">
+                    <div class="sectionheaderrow">
+                        <div class="sectionheader">PDF Details</div>
                         <div>
-                            <button id="pdf-extract-txt-btn">Export All Text (.txt)</button>
+                            <button id="pdfextracttxtbtn">Export All Text (.txt)</button>
                         </div>
                     </div>
             `;
@@ -1782,12 +1701,12 @@
                 const metadata = await pdfDoc.getMetadata().catch(() => null);
 
                 html += `
-                    <div class="table-wrap">
+                    <div class="tablewrap">
                         <table>
                             <tbody>
                                 <tr>
-                                    <td class="cell-key">Pages</td>
-                                    <td class="cell-val">${pdfDoc.numPages}</td>
+                                    <td class="cellkey">Pages</td>
+                                    <td class="cellval">${pdfDoc.numPages}</td>
                                 </tr>
                 `;
 
@@ -1796,8 +1715,8 @@
                         if (value !== undefined && value !== null && value !== '') {
                             html += `
                                 <tr>
-                                    <td class="cell-key">${escapeHtml(key)}</td>
-                                    <td class="cell-val">${escapeHtml(String(value))}</td>
+                                    <td class="cellkey">${sanitizetextshit(key)}</td>
+                                    <td class="cellval">${sanitizetextshit(String(value))}</td>
                                 </tr>
                             `;
                         }
@@ -1811,80 +1730,28 @@
                 `;
 
                 html += `
-                    <div class="sub-header">Document Preview</div>
-                    <div class="pdf-controls">
-                        <button id="pdf-prev-btn">Previous</button>
-                        <button id="pdf-next-btn">Next</button>
-                        <span class="pdf-page-indicator" id="pdf-page-indicator">Page 1 / ${pdfDoc.numPages}</span>
+                    <div class="subheader">Document Preview</div>
+                    <div class="pdfcontrols">
+                        <button id="pdfprevbtn">Previous</button>
+                        <button id="pdfnextbtn">Next</button>
+                        <span class="pdfpageindicator" id="pdfpageindicator">Page 1 / ${pdfDoc.numPages}</span>
                     </div>
-                    <canvas id="pdf-preview-canvas"></canvas>
+                    <canvas id="pdfpreviewcanvas"></canvas>
                 `;
 
-                setTimeout(async () => {
-                    let currentPageNum = 1;
-                    const canvas = document.getElementById('pdf-preview-canvas');
-                    const pageIndicator = document.getElementById('pdf-page-indicator');
-                    const prevBtn = document.getElementById('pdf-prev-btn');
-                    const nextBtn = document.getElementById('pdf-next-btn');
-                    const extractTxtBtn = document.getElementById('pdf-extract-txt-btn');
-
-                    if (extractTxtBtn) {
-                        extractTxtBtn.addEventListener('click', async () => {
-                            extractTxtBtn.disabled = true;
-                            extractTxtBtn.textContent = 'Extracting...';
-                            let fullDocText = '';
-                            for (let p = 1; p <= pdfDoc.numPages; p++) {
-                                const page = await pdfDoc.getPage(p);
-                                const textContent = await page.getTextContent();
-                                const pageStr = textContent.items.map(it => it.str).join(' ');
-                                fullDocText += `--- Page ${p} ---\n${pageStr}\n\n`;
-                            }
-                            triggerDownload(new Blob([fullDocText], { type: 'text/plain' }), file.name.replace(/\.pdf$/, '.txt'));
-                            extractTxtBtn.disabled = false;
-                            extractTxtBtn.textContent = 'Export All Text (.txt)';
-                        });
-                    }
-
-                    async function renderPage(num) {
-                        if (!canvas) return;
-                        const page = await pdfDoc.getPage(num);
-                        const viewport = page.getViewport({ scale: 1.25 });
-                        canvas.width = viewport.width;
-                        canvas.height = viewport.height;
-                        const ctx = canvas.getContext('2d');
-                        await page.render({ canvasContext: ctx, viewport: viewport }).promise;
-                        if (pageIndicator) pageIndicator.textContent = `Page ${num} / ${pdfDoc.numPages}`;
-                    }
-
-                    if (prevBtn && nextBtn) {
-                        prevBtn.addEventListener('click', () => {
-                            if (currentPageNum > 1) {
-                                currentPageNum--;
-                                renderPage(currentPageNum);
-                            }
-                        });
-                        nextBtn.addEventListener('click', () => {
-                            if (currentPageNum < pdfDoc.numPages) {
-                                currentPageNum++;
-                                renderPage(currentPageNum);
-                            }
-                        });
-                    }
-
-                    renderPage(1);
-                }, 0);
+                setTimeout(() => hookpdfcontrolsshit(pdfDoc, file), 0);
 
             } catch (err) {
-                html += `<div class="error-state">Failed to render PDF: ${escapeHtml(err.message)}</div>`;
+                html += `<div class="errorstate">Failed to render PDF: ${sanitizetextshit(err.message)}</div>`;
             }
 
-            if (isEditMode) {
+            if (editswitchshit) {
                 html += `
                     <div class="divider"></div>
-                    <div class="section-header-row">
-                        <div class="section-header">Binary Byte Editor</div>
+                    <div class="sectionheaderrow">
+                        <div class="sectionheader">Binary Byte Editor</div>
                     </div>
-                    ${await renderHexEditor(file)}
+                    ${await hexgridbuildingshit(file)}
                 `;
             }
 
@@ -1892,7 +1759,70 @@
             return html;
         }
 
-        async function handleAudio(file) {
+        
+                async function dumppdfpagetextshit(pdfDoc) {
+            let out = '';
+            for (let p = 1; p <= pdfDoc.numPages; p++) {
+                const page = await pdfDoc.getPage(p);
+                const txt = await page.getTextContent();
+                out += `--- Page ${p} ---\n${txt.items.map(it => it.str).join(' ')}\n\n`;
+            }
+            return out;
+        }
+
+        function hookpdfcontrolsshit(pdfDoc, file) {
+            let pageNum = 1;
+            const canvas = document.getElementById('pdfpreviewcanvas');
+            const indicator = document.getElementById('pdfpageindicator');
+            const prev = document.getElementById('pdfprevbtn');
+            const next = document.getElementById('pdfnextbtn');
+            const btn = document.getElementById('pdfextracttxtbtn');
+
+            const render = async (n) => {
+                if (!canvas) return;
+                const page = await pdfDoc.getPage(n);
+                const vp = page.getViewport({ scale: 1.25 });
+                canvas.width = vp.width;
+                canvas.height = vp.height;
+                await page.render({ canvasContext: canvas.getContext('2d'), viewport: vp }).promise;
+                if (indicator) indicator.textContent = `Page ${n} / ${pdfDoc.numPages}`;
+            };
+
+            if (btn) {
+                btn.onclick = async () => {
+                    btn.disabled = true;
+                    btn.textContent = 'Extracting...';
+                    const text = await dumppdfpagetextshit(pdfDoc);
+                    downloadblobshit(new Blob([text], { type: 'text/plain' }), file.name.replace(/\.pdf$/, '.txt'));
+                    btn.disabled = false;
+                    btn.textContent = 'Export All Text (.txt)';
+                };
+            }
+
+            if (prev) prev.onclick = () => { if (pageNum > 1) render(--pageNum); };
+            if (next) next.onclick = () => { if (pageNum < pdfDoc.numPages) render(++pageNum); };
+            render(1);
+        }
+
+                function drawaudiowaveformshit(canvas, rawData) {
+            const ctx = canvas.getContext('2d');
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            const step = Math.ceil(rawData.length / canvas.width);
+            const amp = canvas.height / 2;
+            ctx.fillStyle = '#4f75ff';
+            for (let i = 0; i < canvas.width; i++) {
+                let min = 1.0, max = -1.0;
+                const base = i * step;
+                for (let j = 0; j < step; j++) {
+                    const d = rawData[base + j];
+                    if (d < min) min = d;
+                    if (d > max) max = d;
+                }
+                ctx.fillRect(i, (1 + min) * amp, 1, Math.max(1, (max - min) * amp));
+            }
+        }
+
+        async function showaudiotrackshit(file) {
             const objectUrl = URL.createObjectURL(file);
             const audio = new Audio();
             audio.preload = 'metadata';
@@ -1913,68 +1843,53 @@
 
             setTimeout(async () => {
                 try {
-                    const canvas = document.getElementById('audio-waveform-canvas');
+                    const canvas = document.getElementById('audiowaveformcanvas');
                     if (!canvas) return;
                     const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
                     const arrayBuf = await file.arrayBuffer();
                     const audioBuf = await audioCtx.decodeAudioData(arrayBuf);
                     const rawData = audioBuf.getChannelData(0);
 
-                    const ctx = canvas.getContext('2d');
-                    ctx.clearRect(0, 0, canvas.width, canvas.height);
-                    const step = Math.ceil(rawData.length / canvas.width);
-                    const amp = canvas.height / 2;
-
-                    ctx.fillStyle = '#4f75ff';
-                    for (let i = 0; i < canvas.width; i++) {
-                        let min = 1.0;
-                        let max = -1.0;
-                        for (let j = 0; j < step; j++) {
-                            const datum = rawData[(i * step) + j];
-                            if (datum < min) min = datum;
-                            if (datum > max) max = datum;
-                        }
-                        ctx.fillRect(i, (1 + min) * amp, 1, Math.max(1, (max - min) * amp));
-                    }
+                    drawaudiowaveformshit(canvas, rawData);
                 } catch (e) { }
             }, 0);
 
             let html = `
-                <div class="section-block">
-                    <div class="section-header-row">
-                        <div class="section-header">Audio Information & Waveform</div>
+                <div class="sectionblock">
+                    <div class="sectionheaderrow">
+                        <div class="sectionheader">Audio & Waveform</div>
                     </div>
-                    <div class="table-wrap">
+                    <div class="tablewrap">
                         <table>
                             <tbody>
                                 <tr>
-                                    <td class="cell-key">Duration</td>
-                                    <td class="cell-val">${escapeHtml(formatDuration(audio.duration))}</td>
+                                    <td class="cellkey">Duration</td>
+                                    <td class="cellval">${sanitizetextshit(nicetimeshit(audio.duration))}</td>
                                 </tr>
                                 <tr>
-                                    <td class="cell-key">Type</td>
-                                    <td class="cell-val">${escapeHtml(file.type || 'Unknown')}</td>
+                                    <td class="cellkey">Type</td>
+                                    <td class="cellval">${sanitizetextshit(file.type || 'Unknown')}</td>
                                 </tr>
                                 <tr>
-                                    <td class="cell-key">Tag Inspection</td>
-                                    <td class="cell-val">${escapeHtml(audioTags['Format'] || 'Standard Audio Stream')}</td>
+                                    <td class="cellkey">Tag Inspection</td>
+                                    <td class="cellval">${sanitizetextshit(audioTags['Format'] || 'Standard Audio Stream')}</td>
                                 </tr>
                             </tbody>
                         </table>
                     </div>
-                    <div class="sub-header">Waveform Visualization</div>
-                    <canvas id="audio-waveform-canvas" class="dark-canvas" width="600" height="70"></canvas>
-                    <div class="sub-header">Playback</div>
+                    <div class="subheader">Waveform Visualization</div>
+                    <canvas id="audiowaveformcanvas" class="darkcanvas" width="600" height="70"></canvas>
+                    <div class="subheader">Playback</div>
                     <audio controls src="${objectUrl}"></audio>
             `;
 
-            if (isEditMode) {
+            if (editswitchshit) {
                 html += `
                     <div class="divider"></div>
-                    <div class="section-header-row">
-                        <div class="section-header">Binary Byte Editor</div>
+                    <div class="sectionheaderrow">
+                        <div class="sectionheader">Binary Byte Editor</div>
                     </div>
-                    ${await renderHexEditor(file)}
+                    ${await hexgridbuildingshit(file)}
                 `;
             }
 
@@ -1982,7 +1897,8 @@
             return html;
         }
 
-        async function handleVideo(file) {
+        
+        async function showvideotrackshit(file) {
             const objectUrl = URL.createObjectURL(file);
             const video = document.createElement('video');
             video.preload = 'metadata';
@@ -1994,61 +1910,54 @@
             });
 
             setTimeout(() => {
-                const snapBtn = document.getElementById('video-snapshot-btn');
-                const vid = document.getElementById('main-video-player');
+                const snapBtn = document.getElementById('videosnapshotbtn');
+                const vid = document.getElementById('mainvideoplayer');
                 if (snapBtn && vid) {
-                    snapBtn.addEventListener('click', () => {
-                        const canvas = document.createElement('canvas');
-                        canvas.width = vid.videoWidth || 640;
-                        canvas.height = vid.videoHeight || 360;
-                        const ctx = canvas.getContext('2d');
-                        ctx.drawImage(vid, 0, 0, canvas.width, canvas.height);
-                        canvas.toBlob((blob) => {
-                            if (blob) {
-                                triggerDownload(blob, `snapshot_${Math.floor(vid.currentTime)}s.png`);
-                            }
-                        }, 'image/png');
-                    });
+                    snapBtn.onclick = () => {
+                        drawToCanvasBlob(vid, 'image/png', 1.0, b => {
+                            if (b) downloadblobshit(b, `snapshot_${Math.floor(vid.currentTime)}s.png`);
+                        });
+                    };
                 }
             }, 0);
 
             let html = `
-                <div class="section-block">
-                    <div class="section-header-row">
-                        <div class="section-header">Video Information & Tools</div>
+                <div class="sectionblock">
+                    <div class="sectionheaderrow">
+                        <div class="sectionheader">Video Player & Snap</div>
                         <div>
-                            <button id="video-snapshot-btn" class="btn-success">Capture Frame Snapshot</button>
+                            <button id="videosnapshotbtn" class="btnsuccess">Capture Frame Snapshot</button>
                         </div>
                     </div>
-                    <div class="table-wrap">
+                    <div class="tablewrap">
                         <table>
                             <tbody>
                                 <tr>
-                                    <td class="cell-key">Duration</td>
-                                    <td class="cell-val">${escapeHtml(formatDuration(video.duration))}</td>
+                                    <td class="cellkey">Duration</td>
+                                    <td class="cellval">${sanitizetextshit(nicetimeshit(video.duration))}</td>
                                 </tr>
                                 <tr>
-                                    <td class="cell-key">Resolution</td>
-                                    <td class="cell-val">${video.videoWidth} × ${video.videoHeight}</td>
+                                    <td class="cellkey">Resolution</td>
+                                    <td class="cellval">${video.videoWidth} × ${video.videoHeight}</td>
                                 </tr>
                                 <tr>
-                                    <td class="cell-key">Type</td>
-                                    <td class="cell-val">${escapeHtml(file.type || 'Unknown')}</td>
+                                    <td class="cellkey">Type</td>
+                                    <td class="cellval">${sanitizetextshit(file.type || 'Unknown')}</td>
                                 </tr>
                             </tbody>
                         </table>
                     </div>
-                    <div class="sub-header">Playback</div>
-                    <video id="main-video-player" controls src="${objectUrl}"></video>
+                    <div class="subheader">Playback</div>
+                    <video id="mainvideoplayer" controls src="${objectUrl}"></video>
             `;
 
-            if (isEditMode) {
+            if (editswitchshit) {
                 html += `
                     <div class="divider"></div>
-                    <div class="section-header-row">
-                        <div class="section-header">Binary Byte Editor</div>
+                    <div class="sectionheaderrow">
+                        <div class="sectionheader">Binary Byte Editor</div>
                     </div>
-                    ${await renderHexEditor(file)}
+                    ${await hexgridbuildingshit(file)}
                 `;
             }
 
@@ -2056,48 +1965,48 @@
             return html;
         }
 
-        async function handleHtml(file) {
+        async function showhtmlpreviewshit(file) {
             const fullText = await file.text();
-            activeEditorData = { type: 'text', content: fullText };
+            editdatabullshit = { type: 'text', content: fullText };
 
             let html = `
-                <div class="section-block">
-                    <div class="section-header-row">
-                        <div class="section-header">HTML Document</div>
+                <div class="sectionblock">
+                    <div class="sectionheaderrow">
+                        <div class="sectionheader">HTML Preview</div>
                     </div>
-                    <div class="table-wrap">
+                    <div class="tablewrap">
                         <table>
                             <tbody>
                                 <tr>
-                                    <td class="cell-key">Characters</td>
-                                    <td class="cell-val" id="html-char-count">${fullText.length.toLocaleString()}</td>
+                                    <td class="cellkey">Characters</td>
+                                    <td class="cellval" id="htmlcharcount">${fullText.length.toLocaleString()}</td>
                                 </tr>
                                 <tr>
-                                    <td class="cell-key">Lines</td>
-                                    <td class="cell-val" id="html-line-count">${fullText.split(/\r\n|\r|\n/).length.toLocaleString()}</td>
+                                    <td class="cellkey">Lines</td>
+                                    <td class="cellval" id="htmllinecount">${fullText.split(/\r\n|\r|\n/).length.toLocaleString()}</td>
                                 </tr>
                             </tbody>
                         </table>
                     </div>
-                    <div class="sub-header">Live Web Preview</div>
-                    <iframe id="html-live-frame" sandbox="allow-scripts allow-same-origin"></iframe>
+                    <div class="subheader">Live Web Preview</div>
+                    <iframe id="htmlliveframe" sandbox="allow-scripts allow-same-origin"></iframe>
             `;
 
-            if (isEditMode) {
+            if (editswitchshit) {
                 html += `
-                    <div class="sub-header">HTML Source Editor</div>
-                    <textarea id="text-editor-input" class="editor-textarea" spellcheck="false">${escapeHtml(fullText)}</textarea>
+                    <div class="subheader">HTML Source Editor</div>
+                    <textarea id="texteditorinput" class="editortextarea" spellcheck="false">${sanitizetextshit(fullText)}</textarea>
                 `;
 
                 setTimeout(() => {
-                    const textarea = document.getElementById('text-editor-input');
-                    const iframe = document.getElementById('html-live-frame');
-                    const charCount = document.getElementById('html-char-count');
-                    const lineCount = document.getElementById('html-line-count');
+                    const textarea = document.getElementById('texteditorinput');
+                    const iframe = document.getElementById('htmlliveframe');
+                    const charCount = document.getElementById('htmlcharcount');
+                    const lineCount = document.getElementById('htmllinecount');
 
-                    function updatePreview() {
+                    function syncpreviewframeshit() {
                         const val = textarea.value;
-                        activeEditorData.content = val;
+                        editdatabullshit.content = val;
                         iframe.srcdoc = val;
                         if (charCount) charCount.textContent = val.length.toLocaleString();
                         if (lineCount) lineCount.textContent = val.split(/\r\n|\r|\n/).length.toLocaleString();
@@ -2105,21 +2014,21 @@
 
                     if (textarea && iframe) {
                         iframe.srcdoc = fullText;
-                        textarea.addEventListener('input', updatePreview);
+                        textarea.addEventListener('input', syncpreviewframeshit);
                     }
                 }, 0);
             } else {
-                const maxChars = 200000;
+                const maxChars = 150000;
                 const isTruncated = fullText.length > maxChars;
                 const displayText = isTruncated ? fullText.substring(0, maxChars) : fullText;
 
                 html += `
-                    <div class="sub-header">Source Code${isTruncated ? ' (Truncated)' : ''}</div>
-                    <pre>${escapeHtml(displayText)}</pre>
+                    <div class="subheader">Source Code${isTruncated ? ' (Truncated)' : ''}</div>
+                    <pre>${sanitizetextshit(displayText)}</pre>
                 `;
 
                 setTimeout(() => {
-                    const iframe = document.getElementById('html-live-frame');
+                    const iframe = document.getElementById('htmlliveframe');
                     if (iframe) iframe.srcdoc = fullText;
                 }, 0);
             }
@@ -2128,63 +2037,63 @@
             return html;
         }
 
-        async function handleMarkdown(file) {
+        async function showmarkdownpreviewshit(file) {
             const fullText = await file.text();
-            activeEditorData = { type: 'text', content: fullText };
+            editdatabullshit = { type: 'text', content: fullText };
 
             let html = `
-                <div class="section-block">
-                    <div class="section-header-row">
-                        <div class="section-header">Markdown Document</div>
+                <div class="sectionblock">
+                    <div class="sectionheaderrow">
+                        <div class="sectionheader">Markdown Viewer</div>
                         <div>
-                            <button id="md-export-html-btn">Export as HTML</button>
+                            <button id="mdexporthtmlbtn">Export as HTML</button>
                         </div>
                     </div>
-                    <div class="table-wrap">
+                    <div class="tablewrap">
                         <table>
                             <tbody>
                                 <tr>
-                                    <td class="cell-key">Characters</td>
-                                    <td class="cell-val" id="md-char-count">${fullText.length.toLocaleString()}</td>
+                                    <td class="cellkey">Characters</td>
+                                    <td class="cellval" id="mdcharcount">${fullText.length.toLocaleString()}</td>
                                 </tr>
                                 <tr>
-                                    <td class="cell-key">Lines</td>
-                                    <td class="cell-val" id="md-line-count">${fullText.split(/\r\n|\r|\n/).length.toLocaleString()}</td>
+                                    <td class="cellkey">Lines</td>
+                                    <td class="cellval" id="mdlinecount">${fullText.split(/\r\n|\r|\n/).length.toLocaleString()}</td>
                                 </tr>
                             </tbody>
                         </table>
                     </div>
-                    <div class="sub-header">Rendered Markdown Preview</div>
-                    <div id="md-live-preview" class="markdown-preview">${marked.parse(fullText)}</div>
+                    <div class="subheader">Rendered Markdown Preview</div>
+                    <div id="mdlivepreview" class="markdownpreview">${marked.parse(fullText)}</div>
             `;
 
             setTimeout(() => {
-                const exportBtn = document.getElementById('md-export-html-btn');
+                const exportBtn = document.getElementById('mdexporthtmlbtn');
                 if (exportBtn) {
                     exportBtn.addEventListener('click', () => {
-                        const rendered = marked.parse(activeEditorData.content || fullText);
-                        const doc = `<!DOCTYPE html><html><head><meta charset="utf-8"><title>${escapeHtml(file.name)}</title></head><body>${rendered}</body></html>`;
-                        triggerDownload(new Blob([doc], { type: 'text/html' }), file.name.replace(/\.md$/, '.html'));
+                        const rendered = marked.parse(editdatabullshit.content || fullText);
+                        const doc = `<!DOCTYPE html><html><head><meta charset="utf-8"><title>${sanitizetextshit(file.name)}</title></head><body>${rendered}</body></html>`;
+                        downloadblobshit(new Blob([doc], { type: 'text/html' }), file.name.replace(/\.md$/, '.html'));
                     });
                 }
             }, 0);
 
-            if (isEditMode) {
+            if (editswitchshit) {
                 html += `
-                    <div class="sub-header">Markdown Source Editor</div>
-                    <textarea id="text-editor-input" class="editor-textarea" spellcheck="false">${escapeHtml(fullText)}</textarea>
+                    <div class="subheader">Markdown Source Editor</div>
+                    <textarea id="texteditorinput" class="editortextarea" spellcheck="false">${sanitizetextshit(fullText)}</textarea>
                 `;
 
                 setTimeout(() => {
-                    const textarea = document.getElementById('text-editor-input');
-                    const preview = document.getElementById('md-live-preview');
-                    const charCount = document.getElementById('md-char-count');
-                    const lineCount = document.getElementById('md-line-count');
+                    const textarea = document.getElementById('texteditorinput');
+                    const preview = document.getElementById('mdlivepreview');
+                    const charCount = document.getElementById('mdcharcount');
+                    const lineCount = document.getElementById('mdlinecount');
 
                     if (textarea && preview) {
                         textarea.addEventListener('input', () => {
                             const val = textarea.value;
-                            activeEditorData.content = val;
+                            editdatabullshit.content = val;
                             preview.innerHTML = marked.parse(val);
                             if (charCount) charCount.textContent = val.length.toLocaleString();
                             if (lineCount) lineCount.textContent = val.split(/\r\n|\r|\n/).length.toLocaleString();
@@ -2192,13 +2101,13 @@
                     }
                 }, 0);
             } else {
-                const maxChars = 200000;
+                const maxChars = 150000;
                 const isTruncated = fullText.length > maxChars;
                 const displayText = isTruncated ? fullText.substring(0, maxChars) : fullText;
 
                 html += `
-                    <div class="sub-header">Raw Markdown${isTruncated ? ' (Truncated)' : ''}</div>
-                    <pre>${escapeHtml(displayText)}</pre>
+                    <div class="subheader">Raw Markdown${isTruncated ? ' (Truncated)' : ''}</div>
+                    <pre>${sanitizetextshit(displayText)}</pre>
                 `;
             }
 
@@ -2206,9 +2115,19 @@
             return html;
         }
 
-        async function handleDelimitedTable(file, ext) {
+                function parseTableLinesToJson(rawLines, delimiter) {
+            const headers = rawLines[0].split(delimiter).map(h => h.trim());
+            return rawLines.slice(1).map(line => {
+                const cols = line.split(delimiter);
+                const row = {};
+                headers.forEach((h, idx) => { row[h] = cols[idx] ? cols[idx].trim() : ''; });
+                return row;
+            });
+        }
+
+        async function showcsvtableshit(file, ext) {
             const fullText = await file.text();
-            activeEditorData = { type: 'text', content: fullText };
+            editdatabullshit = { type: 'text', content: fullText };
             const delimiter = ext === 'tsv' ? '\t' : ',';
 
             const rawLines = fullText.split(/\r\n|\r|\n/).filter(line => line.trim().length > 0);
@@ -2218,71 +2137,59 @@
             let tableHtml = '';
             if (totalRows > 0) {
                 const headerCols = rawLines[0].split(delimiter);
-                tableHtml += '<thead><tr>' + headerCols.map(c => `<th>${escapeHtml(c.trim())}</th>`).join('') + '</tr></thead><tbody>';
+                tableHtml += '<thead><tr>' + headerCols.map(c => `<th>${sanitizetextshit(c.trim())}</th>`).join('') + '</tr></thead><tbody>';
 
                 for (let i = 1; i < displayLimit; i++) {
                     const rowCols = rawLines[i].split(delimiter);
-                    tableHtml += '<tr>' + rowCols.map(c => `<td>${escapeHtml(c.trim())}</td>`).join('') + '</tr>';
+                    tableHtml += '<tr>' + rowCols.map(c => `<td>${sanitizetextshit(c.trim())}</td>`).join('') + '</tr>';
                 }
                 tableHtml += '</tbody>';
             }
 
             setTimeout(() => {
-                const convertJsonBtn = document.getElementById('table-to-json-btn');
+                const convertJsonBtn = document.getElementById('tabletojsonbtn');
                 if (convertJsonBtn && totalRows > 0) {
-                    convertJsonBtn.addEventListener('click', () => {
-                        const headers = rawLines[0].split(delimiter).map(h => h.trim());
-                        const records = [];
-                        // We naively split on delimiters here. If someone's cell contains a comma inside quotes,
-                        // godspeed to them, because building an RFC 4180 parser in 10 lines is a fool's errand.
-                        for (let i = 1; i < rawLines.length; i++) {
-                            const cols = rawLines[i].split(delimiter);
-                            const obj = {};
-                            headers.forEach((h, idx) => {
-                                obj[h] = cols[idx] ? cols[idx].trim() : '';
-                            });
-                            records.push(obj);
-                        }
-                        const jsonStr = JSON.stringify(records, null, 2);
-                        triggerDownload(new Blob([jsonStr], { type: 'application/json' }), file.name.replace(/\.[^/.]+$/, '.json'));
-                    });
+                    convertJsonBtn.onclick = () => {
+                        const records = parseTableLinesToJson(rawLines, delimiter);
+                        downloadblobshit(new Blob([JSON.stringify(records, null, 2)], { type: 'application/json' }), file.name.replace(/\.[^/.]+$/, '.json'));
+                    };
                 }
             }, 0);
 
             let html = `
-                <div class="section-block">
-                    <div class="section-header-row">
-                        <div class="section-header">Tabular Data (${ext.toUpperCase()})</div>
+                <div class="sectionblock">
+                    <div class="sectionheaderrow">
+                        <div class="sectionheader">Spreadsheet / CSV (${ext.toUpperCase()})</div>
                         <div>
-                            <button id="table-to-json-btn">Convert to JSON</button>
+                            <button id="tabletojsonbtn">Convert to JSON</button>
                         </div>
                     </div>
-                    <div class="table-wrap">
+                    <div class="tablewrap">
                         <table>
                             <tbody>
                                 <tr>
-                                    <td class="cell-key">Total Rows</td>
-                                    <td class="cell-val">${totalRows.toLocaleString()}</td>
+                                    <td class="cellkey">Total Rows</td>
+                                    <td class="cellval">${totalRows.toLocaleString()}</td>
                                 </tr>
                             </tbody>
                         </table>
                     </div>
-                    <div class="sub-header">Rendered Table (${displayLimit} rows shown)</div>
-                    <div class="table-wrap">
+                    <div class="subheader">Rendered Table (${displayLimit} rows shown)</div>
+                    <div class="tablewrap">
                         <table>${tableHtml}</table>
                     </div>
             `;
 
-            if (isEditMode) {
+            if (editswitchshit) {
                 html += `
-                    <div class="sub-header">Raw Source Editor</div>
-                    <textarea id="text-editor-input" class="editor-textarea" spellcheck="false">${escapeHtml(fullText)}</textarea>
+                    <div class="subheader">Raw Source Editor</div>
+                    <textarea id="texteditorinput" class="editortextarea" spellcheck="false">${sanitizetextshit(fullText)}</textarea>
                 `;
                 setTimeout(() => {
-                    const textarea = document.getElementById('text-editor-input');
+                    const textarea = document.getElementById('texteditorinput');
                     if (textarea) {
                         textarea.addEventListener('input', () => {
-                            activeEditorData.content = textarea.value;
+                            editdatabullshit.content = textarea.value;
                         });
                     }
                 }, 0);
@@ -2292,9 +2199,19 @@
             return html;
         }
 
-        async function handleJson(file) {
+                function convertDataArrayToCsv(data) {
+            if (!Array.isArray(data) || !data.length) return '';
+            const keys = Object.keys(data[0]);
+            let csv = keys.join(',') + '\n';
+            for (const row of data) {
+                csv += keys.map(k => JSON.stringify(row[k] ?? '')).join(',') + '\n';
+            }
+            return csv;
+        }
+
+        async function showjsonpreviewshit(file) {
             const fullText = await file.text();
-            activeEditorData = { type: 'text', content: fullText };
+            editdatabullshit = { type: 'text', content: fullText };
 
             let formattedJson = '';
             let parseError = null;
@@ -2308,55 +2225,49 @@
             }
 
             setTimeout(() => {
-                const convertCsvBtn = document.getElementById('json-to-csv-btn');
+                const convertCsvBtn = document.getElementById('jsontocsvbtn');
                 if (convertCsvBtn) {
-                    convertCsvBtn.addEventListener('click', () => {
+                    convertCsvBtn.onclick = () => {
                         try {
-                            const data = JSON.parse(activeEditorData.content || fullText);
-                            if (Array.isArray(data) && data.length > 0) {
-                                const keys = Object.keys(data[0]);
-                                let csv = keys.join(',') + '\n';
-                                for (const row of data) {
-                                    csv += keys.map(k => JSON.stringify(row[k] ?? '')).join(',') + '\n';
-                                }
-                                triggerDownload(new Blob([csv], { type: 'text/csv' }), file.name.replace(/\.json$/, '.csv'));
-                            }
+                            const data = JSON.parse(editdatabullshit.content || fullText);
+                            const csv = convertDataArrayToCsv(data);
+                            if (csv) downloadblobshit(new Blob([csv], { type: 'text/csv' }), file.name.replace(/\.json$/, '.csv'));
                         } catch (e) { }
-                    });
+                    };
                 }
             }, 0);
 
             let html = `
-                <div class="section-block">
-                    <div class="section-header-row">
-                        <div class="section-header">JSON Document</div>
+                <div class="sectionblock">
+                    <div class="sectionheaderrow">
+                        <div class="sectionheader">JSON Viewer</div>
                         <div>
-                            <button id="json-to-csv-btn">Convert Array to CSV</button>
+                            <button id="jsontocsvbtn">Convert Array to CSV</button>
                         </div>
                     </div>
             `;
 
             if (parseError) {
-                html += `<div class="error-state">Syntax Error: ${escapeHtml(parseError)}</div>`;
+                html += `<div class="errorstate">Syntax Error: ${sanitizetextshit(parseError)}</div>`;
             }
 
-            if (isEditMode) {
+            if (editswitchshit) {
                 html += `
-                    <div class="sub-header">JSON Source Editor</div>
-                    <textarea id="text-editor-input" class="editor-textarea" spellcheck="false">${escapeHtml(formattedJson)}</textarea>
+                    <div class="subheader">JSON Source Editor</div>
+                    <textarea id="texteditorinput" class="editortextarea" spellcheck="false">${sanitizetextshit(formattedJson)}</textarea>
                 `;
                 setTimeout(() => {
-                    const textarea = document.getElementById('text-editor-input');
+                    const textarea = document.getElementById('texteditorinput');
                     if (textarea) {
                         textarea.addEventListener('input', () => {
-                            activeEditorData.content = textarea.value;
+                            editdatabullshit.content = textarea.value;
                         });
                     }
                 }, 0);
             } else {
                 html += `
-                    <div class="sub-header">Formatted View</div>
-                    <pre>${escapeHtml(formattedJson)}</pre>
+                    <div class="subheader">Formatted View</div>
+                    <pre>${sanitizetextshit(formattedJson)}</pre>
                 `;
             }
 
@@ -2364,59 +2275,59 @@
             return html;
         }
 
-        async function handleText(file) {
+        async function showplaintextshit(file) {
             const fullText = await file.text();
-            activeEditorData = { type: 'text', content: fullText };
+            editdatabullshit = { type: 'text', content: fullText };
 
             let html = `
-                <div class="section-block">
-                    <div class="section-header-row">
-                        <div class="section-header">Text Content</div>
+                <div class="sectionblock">
+                    <div class="sectionheaderrow">
+                        <div class="sectionheader">Plain Text</div>
                     </div>
-                    <div class="table-wrap">
+                    <div class="tablewrap">
                         <table>
                             <tbody>
                                 <tr>
-                                    <td class="cell-key">Characters</td>
-                                    <td class="cell-val" id="text-char-count">${fullText.length.toLocaleString()}</td>
+                                    <td class="cellkey">Characters</td>
+                                    <td class="cellval" id="textcharcount">${fullText.length.toLocaleString()}</td>
                                 </tr>
                                 <tr>
-                                    <td class="cell-key">Lines</td>
-                                    <td class="cell-val" id="text-line-count">${fullText.split(/\r\n|\r|\n/).length.toLocaleString()}</td>
+                                    <td class="cellkey">Lines</td>
+                                    <td class="cellval" id="textlinecount">${fullText.split(/\r\n|\r|\n/).length.toLocaleString()}</td>
                                 </tr>
                             </tbody>
                         </table>
                     </div>
             `;
 
-            if (isEditMode) {
+            if (editswitchshit) {
                 html += `
-                    <div class="sub-header">Text Editor</div>
-                    <textarea id="text-editor-input" class="editor-textarea" spellcheck="false">${escapeHtml(fullText)}</textarea>
+                    <div class="subheader">Text Editor</div>
+                    <textarea id="texteditorinput" class="editortextarea" spellcheck="false">${sanitizetextshit(fullText)}</textarea>
                 `;
 
                 setTimeout(() => {
-                    const textarea = document.getElementById('text-editor-input');
-                    const charCount = document.getElementById('text-char-count');
-                    const lineCount = document.getElementById('text-line-count');
+                    const textarea = document.getElementById('texteditorinput');
+                    const charCount = document.getElementById('textcharcount');
+                    const lineCount = document.getElementById('textlinecount');
 
                     if (textarea) {
                         textarea.addEventListener('input', () => {
                             const val = textarea.value;
-                            activeEditorData.content = val;
+                            editdatabullshit.content = val;
                             if (charCount) charCount.textContent = val.length.toLocaleString();
                             if (lineCount) lineCount.textContent = val.split(/\r\n|\r|\n/).length.toLocaleString();
                         });
                     }
                 }, 0);
             } else {
-                const maxChars = 200000;
+                const maxChars = 150000;
                 const isTruncated = fullText.length > maxChars;
                 const displayText = isTruncated ? fullText.substring(0, maxChars) : fullText;
 
                 html += `
-                    <div class="sub-header">Preview${isTruncated ? ' (Truncated)' : ''}</div>
-                    <pre>${escapeHtml(displayText)}</pre>
+                    <div class="subheader">Preview${isTruncated ? ' (Truncated)' : ''}</div>
+                    <pre>${sanitizetextshit(displayText)}</pre>
                 `;
             }
 
@@ -2424,14 +2335,124 @@
             return html;
         }
 
-        async function handleBinary(file) {
-            if (isEditMode) {
+        
+                function extractasciistringsshit(bytes) {
+            let out = [], curr = '';
+            for (let i = 0; i < bytes.length; i++) {
+                const b = bytes[i];
+                if (b >= 32 && b <= 126) {
+                    curr += String.fromCharCode(b);
+                } else {
+                    if (curr.length >= 4) out.push(curr);
+                    curr = '';
+                }
+            }
+            if (curr.length >= 4) out.push(curr);
+            return out;
+        }
+
+        function hookbinaryinspectionshit(file, initialBytes) {
+            const searchBtn = document.getElementById('hexsearchbtn');
+            const searchInput = document.getElementById('hexsearchinput');
+            const stringsBtn = document.getElementById('extractstringsbtn');
+            const previewTextBtn = document.getElementById('previewtextbtn');
+            const subview = document.getElementById('binarysubviewcontainer');
+            const hexOutput = document.getElementById('hexoutput');
+            const seeMoreBtn = document.getElementById('seemorehexbtn');
+            const loadAllBtn = document.getElementById('loadallhexbtn');
+            const hexCount = document.getElementById('hexcount');
+            const hexControls = document.getElementById('hexcontrols');
+
+            if (searchBtn && searchInput && hexOutput) {
+                searchBtn.onclick = () => {
+                    const q = searchInput.value.trim();
+                    if (!q) return;
+                    const reg = new RegExp(`(${q.replace(/[.*+?^${}()|[\\]\\\\]/g, '\\\\$&')})`, 'gi');
+                    hexOutput.innerHTML = sanitizetextshit(hexOutput.textContent).replace(reg, '<mark class="searchhighlight">$1</mark>');
+                };
+            }
+
+            if (stringsBtn && subview) {
+                stringsBtn.onclick = async () => {
+                    stringsBtn.disabled = true;
+                    subview.innerHTML = '<div class="emptystate">Extracting strings...</div>';
+                    try {
+                        const limit = Math.min(file.size, 800 * 1024);
+                        const buf = await file.slice(0, limit).arrayBuffer();
+                        const strList = extractasciistringsshit(new Uint8Array(buf));
+                        subview.innerHTML = `
+                            <div class="subheader">Printable Strings (Minimum 4 characters, scanned up to 800 KB)</div>
+                            <pre style="max-height: 240px;">${sanitizetextshit(strList.slice(0, 500).join('\n'))}</pre>
+                        `;
+                    } catch (err) {
+                        subview.innerHTML = `<div class="errorstate">Extraction failed: ${sanitizetextshit(err.message)}</div>`;
+                    } finally {
+                        stringsBtn.disabled = false;
+                    }
+                };
+            }
+
+            if (previewTextBtn && subview) {
+                previewTextBtn.onclick = async () => {
+                    previewTextBtn.disabled = true;
+                    subview.innerHTML = '<div class="emptystate">Decoding...</div>';
+                    try {
+                        const fullText = await file.text();
+                        const isTruncated = fullText.length > 150000;
+                        const txt = isTruncated ? fullText.substring(0, 150000) : fullText;
+                        subview.innerHTML = `
+                            <div class="subheader">Decoded Text${isTruncated ? ' (Truncated)' : ''}</div>
+                            <pre>${sanitizetextshit(txt)}</pre>
+                        `;
+                    } catch (err) {
+                        subview.innerHTML = `<div class="errorstate">Failed to decode: ${sanitizetextshit(err.message)}</div>`;
+                    } finally {
+                        previewTextBtn.disabled = false;
+                    }
+                };
+            }
+
+            if (file.size > initialBytes) {
+                let currOffset = initialBytes;
+                if (seeMoreBtn) {
+                    seeMoreBtn.onclick = async () => {
+                        seeMoreBtn.disabled = true;
+                        const nextOffset = Math.min(file.size, currOffset + 4096);
+                        const chunkBuf = await file.slice(currOffset, nextOffset).arrayBuffer();
+                        hexOutput.textContent += '\n' + dumphexshit(chunkBuf, currOffset);
+                        currOffset = nextOffset;
+                        if (hexCount) hexCount.textContent = currOffset;
+                        seeMoreBtn.disabled = false;
+                        if (currOffset >= file.size && hexControls) {
+                            hexControls.innerHTML = '<div class="emptystate">Complete binary dump loaded</div>';
+                        }
+                    };
+                }
+                if (loadAllBtn) {
+                    loadAllBtn.onclick = async () => {
+                        loadAllBtn.disabled = true;
+                        if (seeMoreBtn) seeMoreBtn.disabled = true;
+                        loadAllBtn.textContent = 'Loading...';
+                        const fullBuf = await file.slice(currOffset).arrayBuffer();
+                        hexOutput.textContent += '\n' + dumphexshit(fullBuf, currOffset);
+                        currOffset = file.size;
+                        if (hexCount) hexCount.textContent = file.size.toLocaleString();
+                        if (hexControls) {
+                            hexControls.innerHTML = '<div class="emptystate">Complete binary dump loaded</div>';
+                        }
+                    };
+                }
+            }
+        }
+
+        async function showrawbinaryshit(file) {
+            if (editswitchshit) {
                 return `
-                    <div class="section-block">
-                        <div class="section-header-row">
-                            <div class="section-header">Binary & Hex Editor</div>
+                    <div class="sectionblock">
+                        <div class="sectionheaderrow">
+                            <div class="sectionheader">Hex View</div>
                         </div>
-                        ${await renderHexEditor(file)}
+                        ${await hexgridbuildingshit(file)}
                     </div>
                 `;
             }
@@ -2439,175 +2460,80 @@
             const initialBytes = 512;
             const slice = file.slice(0, initialBytes);
             const buffer = await slice.arrayBuffer();
-            const hexText = generateHexDump(buffer, 0);
+            const hexText = dumphexshit(buffer, 0);
 
             let html = `
-                <div class="section-block">
-                    <div class="section-header-row">
-                        <div class="section-header">Binary Inspection & Search</div>
+                <div class="sectionblock">
+                    <div class="sectionheaderrow">
+                        <div class="sectionheader">Raw Hex & Strings</div>
                     </div>
-                    <div class="btn-row">
-                        <input type="text" id="hex-search-input" placeholder="Search text or hex pattern...">
-                        <button id="hex-search-btn">Find</button>
-                        <button id="extract-strings-btn">Extract Printable Strings</button>
-                        <button id="preview-text-btn">Decode as UTF-8</button>
+                    <div class="btnrow">
+                        <input type="text" id="hexsearchinput" placeholder="Search text or hex pattern...">
+                        <button id="hexsearchbtn">Find</button>
+                        <button id="extractstringsbtn">Extract Printable Strings</button>
+                        <button id="previewtextbtn">Decode as UTF-8</button>
                     </div>
-                    <div id="binary-subview-container"></div>
-                    <div class="sub-header">Hex Dump (<span id="hex-count">${Math.min(file.size, initialBytes)}</span> / ${file.size.toLocaleString()} bytes)</div>
-                    <pre id="hex-output">${escapeHtml(hexText)}</pre>
+                    <div id="binarysubviewcontainer"></div>
+                    <div class="subheader">Hex Dump (<span id="hexcount">${Math.min(file.size, initialBytes)}</span> / ${file.size.toLocaleString()} bytes)</div>
+                    <pre id="hexoutput">${sanitizetextshit(hexText)}</pre>
             `;
 
             if (file.size > initialBytes) {
                 html += `
-                    <div class="btn-row" id="hex-controls">
-                        <button id="see-more-hex-btn">Next 4 KB</button>
-                        <button id="load-all-hex-btn">Load All</button>
+                    <div class="btnrow" id="hexcontrols">
+                        <button id="seemorehexbtn">Next 4 KB</button>
+                        <button id="loadallhexbtn">Load All</button>
                     </div>
                 `;
             }
 
             html += `</div>`;
 
-            setTimeout(() => {
-                const previewTextBtn = document.getElementById('preview-text-btn');
-                const stringsBtn = document.getElementById('extract-strings-btn');
-                const searchBtn = document.getElementById('hex-search-btn');
-                const searchInput = document.getElementById('hex-search-input');
-                const subviewContainer = document.getElementById('binary-subview-container');
-                const hexOutput = document.getElementById('hex-output');
-
-                if (searchBtn && searchInput && hexOutput) {
-                    searchBtn.addEventListener('click', () => {
-                        const query = searchInput.value.trim();
-                        if (!query) return;
-                        const original = hexOutput.textContent;
-                        const escapedQuery = query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-                        const regex = new RegExp(`(${escapedQuery})`, 'gi');
-                        hexOutput.innerHTML = escapeHtml(original).replace(regex, '<mark class="search-highlight">$1</mark>');
-                    });
-                }
-
-                if (stringsBtn && subviewContainer) {
-                    stringsBtn.addEventListener('click', async () => {
-                        stringsBtn.disabled = true;
-                        subviewContainer.innerHTML = '<div class="empty-state">Extracting strings...</div>';
-
-                        try {
-                            // Capped at 1 MB because extracting strings across an entire 2 GB ISO
-                            // is an efficient way to turn your browser tab into a miniature space heater.
-                            const scanLimit = Math.min(file.size, 1024 * 1024);
-                            const sliceBuffer = await file.slice(0, scanLimit).arrayBuffer();
-                            const bytes = new Uint8Array(sliceBuffer);
-
-                            let strings = [];
-                            let current = '';
-
-                            for (let i = 0; i < bytes.length; i++) {
-                                const b = bytes[i];
-                                if (b >= 32 && b <= 126) {
-                                    current += String.fromCharCode(b);
-                                } else {
-                                    if (current.length >= 4) {
-                                        strings.push(current);
-                                    }
-                                    current = '';
-                                }
-                            }
-                            if (current.length >= 4) strings.push(current);
-
-                            subviewContainer.innerHTML = `
-                                <div class="sub-header">Printable Strings (Minimum 4 characters, scanned up to 1 MB)</div>
-                                <pre style="max-height: 240px;">${escapeHtml(strings.slice(0, 500).join('\n'))}</pre>
-                            `;
-                        } catch (err) {
-                            subviewContainer.innerHTML = `<div class="error-state">Extraction failed: ${escapeHtml(err.message)}</div>`;
-                        } finally {
-                            stringsBtn.disabled = false;
-                        }
-                    });
-                }
-
-                if (previewTextBtn && subviewContainer) {
-                    previewTextBtn.addEventListener('click', async () => {
-                        previewTextBtn.disabled = true;
-                        subviewContainer.innerHTML = '<div class="empty-state">Decoding...</div>';
-
-                        try {
-                            const maxChars = 200000;
-                            const fullText = await file.text();
-                            const isTruncated = fullText.length > maxChars;
-                            const displayText = isTruncated ? fullText.substring(0, maxChars) : fullText;
-
-                            subviewContainer.innerHTML = `
-                                <div class="sub-header">Decoded Text${isTruncated ? ' (Truncated)' : ''}</div>
-                                <pre>${escapeHtml(displayText)}</pre>
-                            `;
-                        } catch (err) {
-                            subviewContainer.innerHTML = `<div class="error-state">Failed to decode: ${escapeHtml(err.message)}</div>`;
-                        } finally {
-                            previewTextBtn.disabled = false;
-                        }
-                    });
-                }
-
-                if (file.size > initialBytes) {
-                    let currentOffset = initialBytes;
-                    const seeMoreBtn = document.getElementById('see-more-hex-btn');
-                    const loadAllBtn = document.getElementById('load-all-hex-btn');
-                    const hexCount = document.getElementById('hex-count');
-                    const hexControls = document.getElementById('hex-controls');
-
-                    if (seeMoreBtn) {
-                        seeMoreBtn.addEventListener('click', async () => {
-                            seeMoreBtn.disabled = true;
-                            const chunkSize = 4096;
-                            const nextOffset = Math.min(file.size, currentOffset + chunkSize);
-                            const chunkSlice = file.slice(currentOffset, nextOffset);
-                            const chunkBuffer = await chunkSlice.arrayBuffer();
-                            const newDump = generateHexDump(chunkBuffer, currentOffset);
-                            hexOutput.textContent += '\n' + newDump;
-                            currentOffset = nextOffset;
-                            hexCount.textContent = currentOffset;
-                            seeMoreBtn.disabled = false;
-
-                            if (currentOffset >= file.size && hexControls) {
-                                hexControls.innerHTML = '<div class="empty-state">Complete binary dump loaded</div>';
-                            }
-                        });
-                    }
-
-                    if (loadAllBtn) {
-                        loadAllBtn.addEventListener('click', async () => {
-                            loadAllBtn.disabled = true;
-                            if (seeMoreBtn) seeMoreBtn.disabled = true;
-                            loadAllBtn.textContent = 'Loading...';
-
-                            const fullSlice = file.slice(currentOffset);
-                            const fullBuffer = await fullSlice.arrayBuffer();
-                            const fullDump = generateHexDump(fullBuffer, currentOffset);
-                            hexOutput.textContent += '\n' + fullDump;
-                            currentOffset = file.size;
-                            hexCount.textContent = file.size.toLocaleString();
-
-                            if (hexControls) {
-                                hexControls.innerHTML = '<div class="empty-state">Complete binary dump loaded</div>';
-                            }
-                        });
-                    }
-                }
-            }, 0);
+            setTimeout(() => hookbinaryinspectionshit(file, initialBytes), 0);
 
             return html;
         }
 
-        async function renderHexEditor(file) {
+                function handlehexinputchangeshit(e, bytes, displayLimit) {
+            const idx = parseInt(e.target.dataset.index, 10);
+            let parsed = parseInt(e.target.value.trim(), 16);
+            if (isNaN(parsed) || parsed < 0 || parsed > 255) parsed = bytes[idx];
+            bytes[idx] = parsed;
+            e.target.value = parsed.toString(16).padStart(2, '0').toUpperCase();
+
+            const rowStart = Math.floor(idx / 16) * 16;
+            const asciiElem = document.getElementById(`hexasciirow${rowStart}`);
+            if (!asciiElem) return;
+            let asciiStr = '';
+            for (let k = 0; k < 16; k++) {
+                const currIdx = rowStart + k;
+                if (currIdx < displayLimit) {
+                    const b = bytes[currIdx];
+                    asciiStr += (b >= 32 && b <= 126) ? String.fromCharCode(b) : '.';
+                }
+            }
+            asciiElem.textContent = asciiStr;
+        }
+
+        function handlehexinputkeynavshit(e, input) {
+            if (e.key === 'ArrowRight' && input.selectionStart === input.value.length) {
+                const next = input.nextElementSibling || input.closest('tr')?.nextElementSibling?.querySelector('.hexbyteinput');
+                if (next) { next.focus(); next.select(); }
+            } else if (e.key === 'ArrowLeft' && input.selectionStart === 0) {
+                const prev = input.previousElementSibling || input.closest('tr')?.previousElementSibling?.querySelectorAll('.hexbyteinput');
+                if (prev) {
+                    const target = prev.length ? prev[prev.length - 1] : prev;
+                    target.focus(); target.select();
+                }
+            }
+        }
+
+        async function hexgridbuildingshit(file) {
             const buffer = await file.arrayBuffer();
             const bytes = new Uint8Array(buffer);
-            activeEditorData = { type: 'binary', bytes: bytes };
+            editdatabullshit = { type: 'binary', bytes: bytes };
 
-            // We cap interactive DOM inputs at 1,024 bytes. Rendering 50,000 editable input elements
-            // into the DOM will bring Chromium to its knees faster than an infinite while loop.
-            const displayLimit = Math.min(bytes.length, 1024);
+            const displayLimit = Math.min(bytes.length, 1280);
 
             let tableRows = '';
             for (let i = 0; i < displayLimit; i += 16) {
@@ -2620,7 +2546,7 @@
                     if (idx < displayLimit) {
                         const b = bytes[idx];
                         const hexVal = b.toString(16).padStart(2, '0').toUpperCase();
-                        inputsHtml += `<input type="text" maxlength="2" class="hex-byte-input" data-index="${idx}" value="${hexVal}">`;
+                        inputsHtml += `<input type="text" maxlength="2" class="hexbyteinput" data-index="${idx}" value="${hexVal}">`;
                         asciiRow += (b >= 32 && b <= 126) ? String.fromCharCode(b) : '.';
                     } else {
                         inputsHtml += `<span style="display:inline-block;width:24px;"></span>`;
@@ -2629,62 +2555,24 @@
 
                 tableRows += `
                     <tr>
-                        <td class="hex-offset-col">${offset}</td>
-                        <td><div class="hex-bytes-col">${inputsHtml}</div></td>
-                        <td class="hex-ascii-col" id="hex-ascii-row-${i}">${escapeHtml(asciiRow)}</td>
+                        <td class="hexoffsetcol">${offset}</td>
+                        <td><div class="hexbytescol">${inputsHtml}</div></td>
+                        <td class="hexasciicol" id="hexasciirow${i}">${sanitizetextshit(asciiRow)}</td>
                     </tr>
                 `;
             }
 
             setTimeout(() => {
-                const inputs = document.querySelectorAll('.hex-byte-input');
-                inputs.forEach(input => {
-                    input.addEventListener('change', (e) => {
-                        const idx = parseInt(e.target.dataset.index, 10);
-                        let val = e.target.value.trim();
-                        let parsed = parseInt(val, 16);
-
-                        if (isNaN(parsed) || parsed < 0 || parsed > 255) {
-                            parsed = bytes[idx];
-                        }
-
-                        bytes[idx] = parsed;
-                        e.target.value = parsed.toString(16).padStart(2, '0').toUpperCase();
-
-                        const rowStart = Math.floor(idx / 16) * 16;
-                        const asciiElem = document.getElementById(`hex-ascii-row-${rowStart}`);
-                        if (asciiElem) {
-                            let newAscii = '';
-                            for (let k = 0; k < 16; k++) {
-                                const currIdx = rowStart + k;
-                                if (currIdx < displayLimit) {
-                                    const currB = bytes[currIdx];
-                                    newAscii += (currB >= 32 && currB <= 126) ? String.fromCharCode(currB) : '.';
-                                }
-                            }
-                            asciiElem.textContent = newAscii;
-                        }
-                    });
-
-                    input.addEventListener('keydown', (e) => {
-                        if (e.key === 'ArrowRight' && input.selectionStart === input.value.length) {
-                            const next = input.nextElementSibling || input.closest('tr')?.nextElementSibling?.querySelector('.hex-byte-input');
-                            if (next) { next.focus(); next.select(); }
-                        } else if (e.key === 'ArrowLeft' && input.selectionStart === 0) {
-                            const prev = input.previousElementSibling || input.closest('tr')?.previousElementSibling?.querySelectorAll('.hex-byte-input');
-                            if (prev) {
-                                const target = prev.length ? prev[prev.length - 1] : prev;
-                                target.focus(); target.select();
-                            }
-                        }
-                    });
+                document.querySelectorAll('.hexbyteinput').forEach(input => {
+                    input.onchange = (e) => handlehexinputchangeshit(e, bytes, displayLimit);
+                    input.onkeydown = (e) => handlehexinputkeynavshit(e, input);
                 });
             }, 0);
 
             return `
-                <div class="sub-header">Interactive Hex Byte Editor (${displayLimit.toLocaleString()} of ${bytes.length.toLocaleString()} bytes loaded)</div>
-                <div class="table-wrap">
-                    <table class="hex-editor-table">
+                <div class="subheader">Hex Editor (${displayLimit.toLocaleString()} of ${bytes.length.toLocaleString()} bytes loaded)</div>
+                <div class="tablewrap">
+                    <table class="hexeditortable">
                         <thead>
                             <tr>
                                 <th>Offset</th>
@@ -2700,35 +2588,33 @@
             `;
         }
 
-        function generateHexDump(buffer, startOffset) {
+        function dumphexshit(buffer, startOffset) {
             const bytes = new Uint8Array(buffer);
-            let hexRows = [];
+            let rows = [];
 
             for (let i = 0; i < bytes.length; i += 16) {
                 const offset = (startOffset + i).toString(16).padStart(8, '0');
-                let hexParts = [];
-                let asciiParts = [];
+                let h = [];
+                let a = [];
 
                 for (let j = 0; j < 16; j++) {
                     if (i + j < bytes.length) {
                         const b = bytes[i + j];
-                        hexParts.push(b.toString(16).padStart(2, '0'));
-                        asciiParts.push(b >= 32 && b <= 126 ? String.fromCharCode(b) : '.');
+                        h.push(b.toString(16).padStart(2, '0'));
+                        a.push(b >= 32 && b <= 126 ? String.fromCharCode(b) : '.');
                     } else {
-                        hexParts.push('  ');
-                        asciiParts.push(' ');
+                        h.push('  ');
+                        a.push(' ');
                     }
                 }
 
-                hexRows.push(
-                    `${offset}  ${hexParts.slice(0, 8).join(' ')}  ${hexParts.slice(8).join(' ')}  |${asciiParts.join('')}|`
-                );
+                rows.push(`${offset}  ${h.slice(0, 8).join(' ')}  ${h.slice(8).join(' ')}  |${a.join('')}|`);
             }
 
-            return hexRows.join('\n');
+            return rows.join('\n');
         }
 
-        function escapeHtml(str) {
+        function sanitizetextshit(str) {
             return String(str)
                 .replace(/&/g, '&amp;')
                 .replace(/</g, '&lt;')
@@ -2739,15 +2625,15 @@
     </script>
 </body>
 
-<footer>
+<div class="sitebottom">
     <br>
     <hr>
     <div class="madebyme">
         Made by Pahal :)
     </div>
-    <div class="footer">
-        <a href="https://www.github.com/pahal-desai/FilePeek" class="footerlinks" target="_blank">GitHub</a>
+    <div class="bottomwrap">
+        <a href="https://www.github.com/pahal-desai/FilePeek" class="botlink" target="_blank">GitHub</a>
     </div>
-</footer>
+</div>
 
 </html>
