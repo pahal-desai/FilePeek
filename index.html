@@ -69,7 +69,7 @@
 
         #dropZone.dragging {
             border-color: #4f75ff;
-            background: rgba(79,117,255,0.12);
+            background: rgba(79, 117, 255, 0.12);
         }
 
         #dropZone .droptitle {
@@ -530,7 +530,7 @@
         }
 
         .badgemode.active {
-            background: rgba(79,117,255,0.12);
+            background: rgba(79, 117, 255, 0.12);
             border-color: #4f75ff;
             color: #4f75ff;
         }
@@ -803,7 +803,7 @@
             fetchurlbutton.onclick = fetchRemoteFileUrl;
         }
 
-        
+
         async function eatthisfilebullshit(file) {
             mainoutputbox.innerHTML = '<div class="emptystate">Analyzing file headers, entropy, and structures...</div>';
 
@@ -1056,7 +1056,7 @@
             return `${mins}m ${secs}s ${ms}ms (${seconds.toFixed(2)}s)`;
         }
 
-        
+
         function sniffsignatureshit(bytes, ext) {
             const hex = Array.from(bytes).map(b => b.toString(16).padStart(2, '0').toUpperCase()).join(' ');
 
@@ -1110,7 +1110,7 @@
             };
         }
 
-        
+
 
         function makebasicfileinfoshit(file, magic) {
             const modified = file.lastModified ? new Date(file.lastModified).toISOString().replace('T', ' ').replace('Z', ' UTC') : 'Unknown';
@@ -1153,7 +1153,7 @@
             `;
         }
 
-        
+
         function makehashsectionshit(file) {
             return `
                 <div class="sectionblock">
@@ -1318,7 +1318,7 @@
             `;
         }
 
-                async function unpackziparchiveshit(file) {
+        async function unpackziparchiveshit(file) {
             let html = `
                 <div class="sectionblock">
                     <div class="sectionheaderrow">
@@ -1387,7 +1387,7 @@
             return html;
         }
 
-                function hookZipExtractButtons(zip) {
+        function hookZipExtractButtons(zip) {
             document.querySelectorAll('.archiveextractbtn').forEach(btn => {
                 btn.onclick = async () => {
                     const name = btn.dataset.entryName;
@@ -1423,8 +1423,8 @@
                 const minifyBtn = document.getElementById('svgminifybtn');
                 if (minifyBtn) {
                     minifyBtn.addEventListener('click', () => {
-                        
-                        
+
+
                         let minified = fullText.replace(new RegExp('<!--[\\s\\S]*?-->', 'g'), '');
                         minified = minified.replace(new RegExp('>\\s+<', 'g'), '><').trim();
                         downloadblobshit(new Blob([minified], { type: 'image/svg+xml' }), 'minified_' + file.name);
@@ -1484,7 +1484,7 @@
         }
 
         async function setupfonttestershit(file) {
-                        const fontUrl = URL.createObjectURL(file);
+            const fontUrl = URL.createObjectURL(file);
             const fontName = 'custom_font_' + Date.now();
 
             try {
@@ -1527,7 +1527,7 @@
             `;
         }
 
-        
+
         async function showpicturestuffshit(file) {
             let html = `
                 <div class="sectionblock">
@@ -1614,7 +1614,7 @@
             return html;
         }
 
-                function drawToCanvasBlob(imgEl, mime, quality, onDone) {
+        function drawToCanvasBlob(imgEl, mime, quality, onDone) {
             const c = document.createElement('canvas');
             c.width = imgEl.naturalWidth || imgEl.videoWidth || 800;
             c.height = imgEl.naturalHeight || imgEl.videoHeight || 600;
@@ -1759,8 +1759,8 @@
             return html;
         }
 
-        
-                async function dumppdfpagetextshit(pdfDoc) {
+
+        async function dumppdfpagetextshit(pdfDoc) {
             let out = '';
             for (let p = 1; p <= pdfDoc.numPages; p++) {
                 const page = await pdfDoc.getPage(p);
@@ -1804,7 +1804,7 @@
             render(1);
         }
 
-                function drawaudiowaveformshit(canvas, rawData) {
+        function drawaudiowaveformshit(canvas, rawData) {
             const ctx = canvas.getContext('2d');
             ctx.clearRect(0, 0, canvas.width, canvas.height);
             const step = Math.ceil(rawData.length / canvas.width);
@@ -1897,7 +1897,7 @@
             return html;
         }
 
-        
+
         async function showvideotrackshit(file) {
             const objectUrl = URL.createObjectURL(file);
             const video = document.createElement('video');
@@ -2115,7 +2115,7 @@
             return html;
         }
 
-                function parseTableLinesToJson(rawLines, delimiter) {
+        function parseTableLinesToJson(rawLines, delimiter) {
             const headers = rawLines[0].split(delimiter).map(h => h.trim());
             return rawLines.slice(1).map(line => {
                 const cols = line.split(delimiter);
@@ -2199,7 +2199,7 @@
             return html;
         }
 
-                function convertDataArrayToCsv(data) {
+        function convertDataArrayToCsv(data) {
             if (!Array.isArray(data) || !data.length) return '';
             const keys = Object.keys(data[0]);
             let csv = keys.join(',') + '\n';
@@ -2335,8 +2335,8 @@
             return html;
         }
 
-        
-                function extractasciistringsshit(bytes) {
+
+        function extractasciistringsshit(bytes) {
             let out = [], curr = '';
             for (let i = 0; i < bytes.length; i++) {
                 const b = bytes[i];
@@ -2494,7 +2494,7 @@
             return html;
         }
 
-                function handlehexinputchangeshit(e, bytes, displayLimit) {
+        function handlehexinputchangeshit(e, bytes, displayLimit) {
             const idx = parseInt(e.target.dataset.index, 10);
             let parsed = parseInt(e.target.value.trim(), 16);
             if (isNaN(parsed) || parsed < 0 || parsed > 255) parsed = bytes[idx];
